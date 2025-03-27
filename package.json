@@ -1,0 +1,14 @@
+{
+  "name": "pong-game-demo",
+  "version": "1.0.0",
+  "description": "A simple Pong game built with Vibe Compiler",
+  "scripts": {
+    "build": "vibec",
+    "start": "cd output/current && python3 -m http.server 8000"
+  },
+  "dependencies": {
+    "vibec": "latest"
+  },
+  "author": "",
+  "license": "MIT"
+}
