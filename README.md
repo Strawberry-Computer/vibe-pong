@@ -1,16 +1,17 @@
-# Pong Game Demo with Vibe Compiler
+# Vibe Pong
 
 This is a demo repository showcasing how to build a simple web-based Pong game using the Vibe Compiler (`vibec`). The Vibe Compiler processes prompt stacks to generate code via LLM integration, and this project demonstrates that workflow with a playable Pong game.
 
 ## Project Structure
 ```
-pong-game-demo/
+vibe-pong/
 ├── stacks/
-│   └── pong/
+│   └── core/
 │       ├── 001_create_pong.md  # Initial game setup
-│       └── 002_add_score.md    # Add scoring
+│       ├── 002_add_score.md    # Add scoring
+│       └── 003_ai_player.md    # Add AI opponent
 ├── output/
-│   ├── stages/                 # Per-stage outputs
+│   ├── stacks/                 # Per-stage outputs
 │   └── current/                # Latest game files (index.html, styles.css, game.js)
 ├── vibec.json                  # Configuration
 ├── package.json                # Dependencies and scripts
@@ -29,8 +30,8 @@ Follow these steps to build the Pong game using `vibec`:
 ### Step 1: Clone the Repository
 Get the demo files:
 ```bash
-git clone https://github.com/your-username/pong-game-demo.git
-cd pong-game-demo
+git clone https://github.com/vgrichina/vibe-pong.git
+cd vibe-pong
 ```
 
 ### Step 2: Install Vibe Compiler
@@ -38,14 +39,12 @@ Install `vibec` and other dependencies:
 ```bash
 npm install
 ```
-This installs `vibec` as specified in `package.json`. If you prefer not to install locally, you can use `npx vibec` directly, assuming `vibec` is available on npm.
 
 ### Step 3: Set Up Your API Key
 Configure the LLM API key as an environment variable (preferred for security):
 ```bash
 export VIBEC_API_KEY=your_api_key_here
 ```
-Alternatively, you can set it in a `.env` file if your `vibec` setup supports it, but for this demo, the env var is sufficient.
 
 ### Step 4: Build the Project
 Run `vibec` to process the `stacks/core/` prompts and generate the game files:
@@ -53,65 +52,45 @@ Run `vibec` to process the `stacks/core/` prompts and generate the game files:
 npx vibec
 ```
 - **What Happens**: 
-  - `vibec` reads `vibec.json`, which specifies the `pong` stack.
-  - It processes `stacks/core/001_create_pong.md` to generate `index.html`, `styles.css`, and `game.js` in `output/current/`.
-  - It then processes `stacks/core/002_add_score.md`, updating `index.html` and `game.js` with scoring features.
-  - Outputs are saved in `output/stages/` (per stage) and merged into `output/current/` (latest version).
-- **Configuration**: The `vibec.json` file sets `"stacks": ["pong"]` and `"output": "output"`, but you can override these with CLI flags (e.g., `--stacks/core --output=custom_dir`).
+  - `vibec` reads `vibec.json`, which specifies the `core` stack.
+  - It processes each prompt in order: 
+    1. Creates basic Pong game (`001_create_pong.md`) 
+    2. Adds scoring system (`002_add_score.md`)
+    3. Adds AI opponent (`003_ai_player.md`)
+  - Outputs are saved in `output/stacks/` (per stage) and merged into `output/current/` (latest version).
 
 ### Step 5: Verify the Output
 Check the generated files:
 ```bash
 ls output/current/
 ```
-You should see `index.html`, `styles.css`, and `game.js`. The `output/stages/` directory will contain subfolders (e.g., `1/`, `2/`) with individual stage outputs.
+You should see `index.html`, `styles.css`, and `game.js`.
 
 ### Step 6: Run the Game
-Serve the game locally using Python’s HTTP server (or any static server):
+Serve the game locally using Python's HTTP server (or any static server):
 ```bash
 cd output/current
 python3 -m http.server 8000
 ```
-Open `http://localhost:8000` in your browser to play the Pong game. Use arrow keys to move the paddle and hit the ball; the score increases with each successful hit.
+Open `http://localhost:8000` in your browser to play the Pong game.
 
-### Step 7 (Optional): Debug the Build
-If something goes wrong (e.g., no files generated):
-- Enable debug mode:
-  ```bash
-  export VIBEC_DEBUG=1
-  npx vibec
-  ```
-- Check the logs for errors (e.g., missing API key, prompt syntax issues).
+## Game Features
 
-## Customizing the Build
-- **Change Stacks**: Edit `vibec.json` or use `--stacks/core` to target specific stacks.
-- **Dry Run**: Test without writing files:
-  ```bash
-  npx vibec --dry-run
-  ```
-- **Retries**: Retry failed LLM calls:
-  ```bash
-  npx vibec --retries=2
-  ```
-- **Custom Output**: Change the output directory:
-  ```bash
-  npx vibec --output=custom_output
-  ```
-See the full list of options with:
-```bash
-npx vibec --help
-```
+The Pong game implements the following features across three development stages:
 
-## How It Works
-- **`001_create_pong.md`**: Sets up the basic game with a paddle, ball, and movement.
-- **`002_add_score.md`**: Adds a score display and logic, building on the initial files.
-- **`vibec`**: Processes these Markdown prompts in order, using an LLM to generate code based on the descriptions and outputs them as specified.
+1. **Basic Pong Game (Stage 1)**
+   - Canvas-based game with paddle and ball
+   - Keyboard controls for player paddle
+   - Ball physics with wall and paddle collisions
 
-## Troubleshooting
-- **No Output Files**: Ensure `VIBEC_API_KEY` is set and prompts have valid `## Output:` sections.
-- **`vibec` Not Found**: Verify installation (`npm install vibec`) or use `npx vibec`.
-- **API Errors**: Check your API key and endpoint (`VIBEC_API_URL` if not default).
-- **Debug Logs**: Use `VIBEC_DEBUG=1` to diagnose issues.
+2. **Scoring System (Stage 2)**
+   - Score tracking when ball hits paddle
+   - Score display on screen
+   - Ball resets when it misses the paddle
+
+3. **AI Opponent (Stage 3)**
+   - Computer-controlled opponent paddle
+   - Two-player gameplay (human vs. computer)
 
 ## License
 MIT
