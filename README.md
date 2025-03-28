@@ -48,16 +48,16 @@ export VIBEC_API_KEY=your_api_key_here
 Alternatively, you can set it in a `.env` file if your `vibec` setup supports it, but for this demo, the env var is sufficient.
 
 ### Step 4: Build the Project
-Run `vibec` to process the `stacks/pong/` prompts and generate the game files:
+Run `vibec` to process the `stacks/core/` prompts and generate the game files:
 ```bash
 npx vibec
 ```
 - **What Happens**: 
   - `vibec` reads `vibec.json`, which specifies the `pong` stack.
-  - It processes `stacks/pong/001_create_pong.md` to generate `index.html`, `styles.css`, and `game.js` in `output/current/`.
-  - It then processes `stacks/pong/002_add_score.md`, updating `index.html` and `game.js` with scoring features.
+  - It processes `stacks/core/001_create_pong.md` to generate `index.html`, `styles.css`, and `game.js` in `output/current/`.
+  - It then processes `stacks/core/002_add_score.md`, updating `index.html` and `game.js` with scoring features.
   - Outputs are saved in `output/stages/` (per stage) and merged into `output/current/` (latest version).
-- **Configuration**: The `vibec.json` file sets `"stacks": ["pong"]` and `"output": "output"`, but you can override these with CLI flags (e.g., `--stacks=pong --output=custom_dir`).
+- **Configuration**: The `vibec.json` file sets `"stacks": ["pong"]` and `"output": "output"`, but you can override these with CLI flags (e.g., `--stacks/core --output=custom_dir`).
 
 ### Step 5: Verify the Output
 Check the generated files:
@@ -84,7 +84,7 @@ If something goes wrong (e.g., no files generated):
 - Check the logs for errors (e.g., missing API key, prompt syntax issues).
 
 ## Customizing the Build
-- **Change Stacks**: Edit `vibec.json` or use `--stacks=pong` to target specific stacks.
+- **Change Stacks**: Edit `vibec.json` or use `--stacks/core` to target specific stacks.
 - **Dry Run**: Test without writing files:
   ```bash
   npx vibec --dry-run
