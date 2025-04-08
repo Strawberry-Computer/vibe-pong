@@ -1,4 +1,4 @@
 {
-  "stacks": ["pong"],
+  "stacks": ["core"],
   "output": "output"
 }
