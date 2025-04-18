@@ -1,26 +1,21 @@
-let canvas = document.getElementById('pongCanvas');
-let ctx = canvas.getContext('2d');
+var canvas = document.getElementById("pongCanvas");
+var ctx = canvas.getContext("2d");
 
-// Paddle parameters
-let paddleWidth = 100;
-let paddleHeight = 10;
-let playerPaddleX = (canvas.width/2 - paddleWidth)/2;
-let aiPaddleX = (canvas.width/2 - paddleWidth)/2 + canvas.width/2;
+var paddleWidth = 100;
+var paddleHeight = 10;
+var playerPaddleX = (canvas.width - paddleWidth) / 2;
+var aiPaddleX = (canvas.width - paddleWidth) / 2;
+var rightPressed = false;
+var leftPressed = false;
 
-// Ball parameters
-let x = canvas.width/2;
-let y = canvas.height-30;
-let dx = 2;
-let dy = -2;
-let ballRadius = 10;
+var ballRadius = 10;
+var x = canvas.width / 2;
+var y = canvas.height - 30;
+var dx = 2;
+var dy = -2;
 
-// Key press events
-let rightPressed = false;
-let leftPressed = false;
-
-// Score
-let score = 0;
-let scoreDisplay = document.getElementById('score');
+var score = 0;
+var scoreDisplay = document.getElementById("score");
 
 document.addEventListener("keydown", keyDownHandler, false);
 document.addEventListener("keyup", keyUpHandler, false);
@@ -41,85 +36,68 @@ function keyUpHandler(e) {
     }
 }
 
-// AI movement
-function aiMovement() {
-    let paddleMiddle = aiPaddleX + (paddleWidth/2);
-    if(paddleMiddle - x < -75) {
-        if(aiPaddleX + paddleWidth < canvas.width){
-            aiPaddleX += 2;
-        }
-    } else if(paddleMiddle - x > 75){
-        if(aiPaddleX > 0){
-            aiPaddleX -= 2;
-        }
-    }
+function drawPaddle() {
+    ctx.beginPath();
+    ctx.rect(playerPaddleX, canvas.height - paddleHeight, paddleWidth, paddleHeight);
+    ctx.rect(aiPaddleX, 0, paddleWidth, paddleHeight); //draw ai paddle
+    ctx.fillStyle = "#FFFFFF";
+    ctx.fill();
+    ctx.closePath();
 }
 
-// Animation
+function drawBall() {
+    ctx.beginPath();
+    ctx.arc(x, y, ballRadius, 0, Math.PI * 2);
+    ctx.fillStyle = "white";
+    ctx.fill();
+    ctx.closePath();
+}
+
 function draw() {
-
-    // clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-  
-    // draw player's paddle
-    ctx.beginPath();
-    ctx.rect(playerPaddleX, canvas.height-paddleHeight, paddleWidth, paddleHeight);
-    ctx.fillStyle = "#0095DD";
-    ctx.fill();
-    ctx.closePath();
-
-    // draw AI's paddle
-    ctx.beginPath();
-    ctx.rect(aiPaddleX, canvas.height-paddleHeight, paddleWidth, paddleHeight);
-    ctx.fillStyle = "#FF0000";
-    ctx.fill();
-    ctx.closePath();
-
-    // draw ball
-    ctx.beginPath();
-    ctx.arc(x, y, ballRadius, 0, Math.PI*2);
-    ctx.fillStyle = "#0095DD";
-    ctx.fill();
-    ctx.closePath();
-
-    // ball and wall collision detection
-    if (x + dx > canvas.width-ballRadius || x + dx < ballRadius) {
-        dx = -dx;
-    }
-
-    // ball and paddle collision detection
-    if(y + dy > canvas.height-ballRadius) {
-        if (x > playerPaddleX && x < playerPaddleX + paddleWidth) {
-            dy = -dy;
-            score++;
-            scoreDisplay.textContent = "Score: " + score;
-        } else if (x > aiPaddleX && x < aiPaddleX + paddleWidth) {
-            dy = -dy;
-        } else {
-            x = canvas.width/2;
-            y = canvas.height-30;
-            dy = -dy;
-        }
-    }
-
-    // paddle movement
-    if (rightPressed && playerPaddleX < canvas.width-paddleWidth) {
-        playerPaddleX += 7;
-    } else if (leftPressed && playerPaddleX >0) {
-        playerPaddleX -= 7;
-    }
-
-    // AI paddle movement
-    aiMovement();
-
-    // ball movement
+    drawPaddle();
+    drawBall();
     x += dx;
     y += dy;
 
-    // animate
-    requestAnimationFrame(draw);
+    // ai paddle motion
+    if (x < aiPaddleX) {
+        aiPaddleX -= 4;
+    }
+    if (x > aiPaddleX + paddleWidth) {
+        aiPaddleX += 4;
+    }
 
+    if (y + dy < ballRadius) {
+        if (x > aiPaddleX && x < aiPaddleX + paddleWidth) {
+            dy = -dy;
+        } else {
+            x = canvas.width / 2;
+            y = canvas.height - 30;
+            dx = dx > 0 ? 2 : -2;  // reset ball x-direction
+        }
+    } else if (y + dy > canvas.height - ballRadius) {
+        if (x > playerPaddleX && x < playerPaddleX + paddleWidth) {
+            dy = -dy;
+            score++;
+            scoreDisplay.innerHTML = "Score: " + score;
+        } else {
+            x = canvas.width / 2;
+            y = canvas.height - 30;
+            dx = dx > 0 ? 2 : -2;  // reset ball x-direction
+        }
+    }
+
+    if (x + dx > canvas.width - ballRadius || x + dx < ballRadius) {
+        dx = -dx;
+    }
+
+    if (rightPressed && playerPaddleX < canvas.width - paddleWidth) {
+        playerPaddleX += 7;
+    } else if (leftPressed && playerPaddleX > 0) {
+        playerPaddleX -= 7;
+    }
+    requestAnimationFrame(draw);
 }
 
-// start game
 draw();

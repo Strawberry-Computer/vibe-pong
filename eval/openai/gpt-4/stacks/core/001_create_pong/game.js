@@ -1,21 +1,17 @@
-let canvas = document.getElementById('pongCanvas');
-let ctx = canvas.getContext('2d');
+var canvas = document.getElementById("pongCanvas");
+var ctx = canvas.getContext("2d");
 
-// Paddle parameters
-let paddleWidth = 100;
-let paddleHeight = 10;
-let paddleX = (canvas.width - paddleWidth) / 2;
+var paddleWidth = 100;
+var paddleHeight = 10;
+var paddleX = (canvas.width - paddleWidth) / 2;
+var rightPressed = false;
+var leftPressed = false;
 
-// Ball parameters
-let x = canvas.width/2;
-let y = canvas.height-30;
-let dx = 2;
-let dy = -2;
-let ballRadius = 10;
-
-// Key press events
-let rightPressed = false;
-let leftPressed = false;
+var ballRadius = 10;
+var x = canvas.width / 2;
+var y = canvas.height - 30;
+var dx = 2;
+var dy = -2;
 
 document.addEventListener("keydown", keyDownHandler, false);
 document.addEventListener("keyup", keyUpHandler, false);
@@ -36,57 +32,50 @@ function keyUpHandler(e) {
     }
 }
 
-// Animation
+function drawPaddle() {
+    ctx.beginPath();
+    ctx.rect(paddleX, canvas.height - paddleHeight, paddleWidth, paddleHeight);
+    ctx.fillStyle = "#FFFFFF";
+    ctx.fill();
+    ctx.closePath();
+}
+
+function drawBall() {
+    ctx.beginPath();
+    ctx.arc(x, y, ballRadius, 0, Math.PI * 2);
+    ctx.fillStyle = "white";
+    ctx.fill();
+    ctx.closePath();
+}
+
 function draw() {
-
-    // clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawPaddle();
+    drawBall();
+    x += dx;
+    y += dy;
 
-    // draw paddle
-    ctx.beginPath();
-    ctx.rect(paddleX, canvas.height-paddleHeight, paddleWidth, paddleHeight);
-    ctx.fillStyle = "#FFFFFF";
-    ctx.fill();
-    ctx.closePath();
-
-    // draw ball
-    ctx.beginPath();
-    ctx.arc(x, y, ballRadius, 0, Math.PI*2);
-    ctx.fillStyle = "#FFFFFF";
-    ctx.fill();
-    ctx.closePath();
-
-    // ball and wall collision detection
-    if (x + dx > canvas.width-ballRadius || x + dx < ballRadius) {
-        dx = -dx;
-    }
     if (y + dy < ballRadius) {
         dy = -dy;
-    } else if (y + dy > canvas.height-paddleHeight) {
+    } else if (y + dy > canvas.height - ballRadius) {
         if (x > paddleX && x < paddleX + paddleWidth) {
             dy = -dy;
         } else {
-            x = canvas.width/2;
-            y = canvas.height-30;
-            dy = -dy;
+            x = canvas.width / 2;
+            y = canvas.height - 30;
         }
     }
 
-    // paddle movement
-    if (rightPressed && paddleX < canvas.width-paddleWidth) {
+    if (x + dx > canvas.width - ballRadius || x + dx < ballRadius) {
+        dx = -dx;
+    }
+
+    if (rightPressed && paddleX < canvas.width - paddleWidth) {
         paddleX += 7;
     } else if (leftPressed && paddleX > 0) {
         paddleX -= 7;
     }
-
-    // ball movement
-    x += dx;
-    y += dy;
-
-    // animate
     requestAnimationFrame(draw);
-
 }
 
-// start game
 draw();
