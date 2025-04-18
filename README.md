@@ -13,6 +13,8 @@ vibe-pong/
 ├── output/
 │   ├── stacks/                 # Per-stage outputs
 │   └── current/                # Latest game files (index.html, styles.css, game.js)
+├── eval/                       # Multi-model evaluation results
+├── eval.sh                     # Script to run evaluation across multiple LLMs
 ├── vibec.json                  # Configuration
 ├── package.json                # Dependencies and scripts
 └── README.md                   # This file
@@ -91,6 +93,23 @@ The Pong game implements the following features across three development stages:
 3. **AI Opponent (Stage 3)**
    - Computer-controlled opponent paddle
    - Two-player gameplay (human vs. computer)
+
+## Model Evaluation
+
+The project includes an evaluation script (`eval.sh`) that tests how different LLMs perform when generating the Pong game:
+
+```bash
+# Run evaluation across all supported models
+./eval.sh
+```
+
+This script:
+- Tests multiple LLM models including GPT-4, Claude, Gemini, and DeepSeek variants
+- Runs each model through the same prompt stacks
+- Outputs results to the `eval/` directory with model-specific folders
+- Generates a summary in `eval/results.log`
+
+You can use this to benchmark different LLMs and compare their code generation capabilities.
 
 ## License
 MIT
