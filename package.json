@@ -6,9 +6,9 @@
     "build": "vibec",
     "start": "cd output/current && python3 -m http.server 8000"
   },
-  "dependencies": {
-    "vibec": "latest"
-  },
   "author": "",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "vibec": "^0.1.1"
+  }
 }
