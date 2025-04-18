@@ -7,8 +7,14 @@ mkdir -p eval
 # Using common OpenRouter and OpenAI compatible models
 MODELS=(
     "openai/gpt-4"
+    "openai/gpt-4.1"
+    "openai/gpt-4o-mini"
     "anthropic/claude-3.5-sonnet"
     "anthropic/claude-3.7-sonnet"
+    "google/gemini-2.0-flash-001"
+    "google/gemini-2.5-pro-exp-03-25:free"
+    "deepseek/deepseek-chat-v3-0324:free"
+    "deepseek/deepseek-r1:free"
 )
 
 # Function to run evaluation for a model
