@@ -1,0 +1,4 @@
+Starting evaluation at Fri Apr 18 02:09:52 PDT 2025
+✓ Success: openai/gpt-4
+✓ Success: anthropic/claude-3.5-sonnet
+✓ Success: anthropic/claude-3.7-sonnet

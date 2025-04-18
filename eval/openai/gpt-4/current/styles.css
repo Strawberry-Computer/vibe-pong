@@ -1,0 +1,11 @@
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 90vh;
+    background: black;
+}
+
+#pongCanvas {
+    border: 1px solid white;
+}
