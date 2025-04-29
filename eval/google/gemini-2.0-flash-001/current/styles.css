@@ -1,0 +1,14 @@
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: black;
+    margin: 0; /* Remove default body margins */
+}
+
+#pongCanvas {
+    /* PROMPT: CSS: Center the canvas on the page with a black background and white border. */
+    border: 2px solid white;
+
+}

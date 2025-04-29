@@ -1,84 +1,47 @@
 const canvas = document.getElementById('pongCanvas');
 const ctx = canvas.getContext('2d');
-const scoreDisplay = document.getElementById('score');
 
-// Score tracking
-let score = 0;
-
-// Game objects
 const paddle = {
     width: 100,
     height: 10,
-    x: 350,
-    y: canvas.height - 20,
-    speed: 8,
-    dx: 0
+    x: canvas.width / 2 - 50,
+    y: canvas.height - 20
 };
 
 const ball = {
     x: canvas.width / 2,
     y: canvas.height / 2,
     radius: 10,
-    speed: 4,
     dx: 4,
     dy: -4
 };
 
-// Controls
-let rightPressed = false;
-let leftPressed = false;
+// PROMPT: Initialize a score variable starting at 0
+let score = 0;
 
-// Event listeners
-document.addEventListener('keydown', keyDownHandler);
-document.addEventListener('keyup', keyUpHandler);
-
-function keyDownHandler(e) {
-    if (e.key === 'Right' || e.key === 'ArrowRight') {
-        rightPressed = true;
-    } else if (e.key === 'Left' || e.key === 'ArrowLeft') {
-        leftPressed = true;
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft' && paddle.x > 0) {
+        paddle.x -= 20;
     }
-}
-
-function keyUpHandler(e) {
-    if (e.key === 'Right' || e.key === 'ArrowRight') {
-        rightPressed = false;
-    } else if (e.key === 'Left' || e.key === 'ArrowLeft') {
-        leftPressed = false;
+    if (e.key === 'ArrowRight' && paddle.x < canvas.width - paddle.width) {
+        paddle.x += 20;
     }
+});
+
+// PROMPT: Reset the ball to the center (with random x-direction) when it misses the paddle
+function resetBall() {
+    ball.x = canvas.width / 2;
+    ball.y = canvas.height / 2;
+    ball.dx = 4 * (Math.random() > 0.5 ? 1 : -1);
+    ball.dy = -4;
 }
 
-// Drawing functions
-function drawPaddle() {
-    ctx.beginPath();
-    ctx.rect(paddle.x, paddle.y, paddle.width, paddle.height);
-    ctx.fillStyle = 'white';
-    ctx.fill();
-    ctx.closePath();
+// PROMPT: Update the score display in the DOM each frame
+function updateScore() {
+    document.getElementById('score').textContent = `Score: ${score}`;
 }
 
-function drawBall() {
-    ctx.beginPath();
-    ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
-    ctx.fillStyle = 'white';
-    ctx.fill();
-    ctx.closePath();
-}
-
-// Game logic
-function movePaddle() {
-    if (rightPressed && paddle.x < canvas.width - paddle.width) {
-        paddle.x += paddle.speed;
-    } else if (leftPressed && paddle.x > 0) {
-        paddle.x -= paddle.speed;
-    }
-}
-
-function moveBall() {
-    ball.x += ball.dx;
-    ball.y += ball.dy;
-
-    // Wall collision detection
+function detectCollisions() {
     if (ball.x + ball.radius > canvas.width || ball.x - ball.radius < 0) {
         ball.dx = -ball.dx;
     }
@@ -86,45 +49,38 @@ function moveBall() {
         ball.dy = -ball.dy;
     }
 
-    // Paddle collision detection
-    if (ball.y + ball.radius > paddle.y &&
-        ball.x > paddle.x &&
-        ball.x < paddle.x + paddle.width) {
-        ball.dy = -ball.dy;
-        score += 1; // Increment score when ball hits paddle
-        updateScore();
-    }
-
-    // Ball reset if it goes below paddle
     if (ball.y + ball.radius > canvas.height) {
         resetBall();
     }
+
+    // PROMPT: Increment the score when the ball hits the paddle
+    if (ball.y + ball.radius > paddle.y && 
+        ball.x > paddle.x && 
+        ball.x < paddle.x + paddle.width) {
+        ball.dy = -ball.dy;
+        score += 1;
+        updateScore();
+    }
 }
 
-function resetBall() {
-    ball.x = canvas.width / 2;
-    ball.y = canvas.height / 2;
-    // Randomize horizontal direction
-    ball.dx = (Math.random() < 0.5 ? 1 : -1) * ball.speed;
-    ball.dy = -ball.speed;
-}
-
-function updateScore() {
-    scoreDisplay.textContent = `Score: ${score}`;
-}
-
-// Game loop
-function update() {
+function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    drawPaddle();
-    drawBall();
+    ctx.fillStyle = 'white';
+    ctx.fillRect(paddle.x, paddle.y, paddle.width, paddle.height);
     
-    movePaddle();
-    moveBall();
-    
-    requestAnimationFrame(update);
+    ctx.beginPath();
+    ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+    ctx.fillStyle = 'white';
+    ctx.fill();
+    ctx.closePath();
+
+    ball.x += ball.dx;
+    ball.y += ball.dy;
+
+    detectCollisions();
+
+    requestAnimationFrame(draw);
 }
 
-// Start the game
-update();
+draw();

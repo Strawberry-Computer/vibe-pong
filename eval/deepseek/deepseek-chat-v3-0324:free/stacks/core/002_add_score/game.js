@@ -1,115 +1,83 @@
-const canvas = document.getElementById('pongCanvas');
+const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const scoreDisplay = document.getElementById('score');
 
-// Game elements
-const paddleWidth = 100;
-const paddleHeight = 10;
-const ballRadius = 10;
-
-let paddleX = (canvas.width - paddleWidth) / 2;
-let ballX = canvas.width / 2;
-let ballY = canvas.height / 2;
-let ballSpeedX = 4;
-let ballSpeedY = 4;
+// PROMPT: Initialize a score variable starting at 0
 let score = 0;
 
-// Key states
-let rightPressed = false;
-let leftPressed = false;
+const ball = {
+    x: canvas.width / 2,
+    y: canvas.height / 2,
+    radius: 10,
+    dx: 4 * (Math.random() > 0.5 ? 1 : -1),
+    dy: 4
+};
 
-// Event listeners
-document.addEventListener('keydown', keyDownHandler);
-document.addEventListener('keyup', keyUpHandler);
-
-function keyDownHandler(e) {
-    if (e.key === 'Right' || e.key === 'ArrowRight') {
-        rightPressed = true;
-    } else if (e.key === 'Left' || e.key === 'ArrowLeft') {
-        leftPressed = true;
-    }
-}
-
-function keyUpHandler(e) {
-    if (e.key === 'Right' || e.key === 'ArrowRight') {
-        rightPressed = false;
-    } else if (e.key === 'Left' || e.key === 'ArrowLeft') {
-        leftPressed = false;
-    }
-}
-
-function drawPaddle() {
-    ctx.beginPath();
-    ctx.rect(paddleX, canvas.height - paddleHeight, paddleWidth, paddleHeight);
-    ctx.fillStyle = 'white';
-    ctx.fill();
-    ctx.closePath();
-}
+const paddle = {
+    width: 100,
+    height: 15,
+    x: canvas.width / 2 - 50
+};
 
 function drawBall() {
     ctx.beginPath();
-    ctx.arc(ballX, ballY, ballRadius, 0, Math.PI * 2);
-    ctx.fillStyle = 'white';
+    ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+    ctx.fillStyle = '#fff';
     ctx.fill();
     ctx.closePath();
 }
 
-function updateScore() {
-    scoreDisplay.textContent = `Score: ${score}`;
+function drawPaddle() {
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(paddle.x, canvas.height - paddle.height, paddle.width, paddle.height);
 }
 
 function update() {
-    // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    // Draw elements
-    drawPaddle();
     drawBall();
+    drawPaddle();
     
-    // Move paddle
-    if (rightPressed && paddleX < canvas.width - paddleWidth) {
-        paddleX += 7;
-    } else if (leftPressed && paddleX > 0) {
-        paddleX -= 7;
+    ball.x += ball.dx;
+    ball.y += ball.dy;
+    
+    // Wall collision (left/right)
+    if (ball.x + ball.radius > canvas.width || ball.x - ball.radius < 0) {
+        ball.dx = -ball.dx;
     }
     
-    // Move ball
-    ballX += ballSpeedX;
-    ballY += ballSpeedY;
-    
-    // Wall collision (top, left, right)
-    if (ballY - ballRadius < 0) {
-        ballSpeedY = -ballSpeedY;
-    }
-    if (ballX - ballRadius < 0 || ballX + ballRadius > canvas.width) {
-        ballSpeedX = -ballSpeedX;
+    // Wall collision (top)
+    if (ball.y - ball.radius < 0) {
+        ball.dy = -ball.dy;
     }
     
     // Paddle collision
-    if (
-        ballY + ballRadius > canvas.height - paddleHeight &&
-        ballX > paddleX &&
-        ballX < paddleX + paddleWidth
-    ) {
-        ballSpeedY = -ballSpeedY;
+    if (ball.y + ball.radius > canvas.height - paddle.height && 
+        ball.x > paddle.x && ball.x < paddle.x + paddle.width) {
+        ball.dy = -ball.dy;
+        // PROMPT: Increment the score when the ball hits the paddle
         score++;
-        updateScore();
+        // PROMPT: Update the score display in the DOM each frame
+        scoreDisplay.textContent = `Score: ${score}`;
     }
     
-    // Bottom wall (miss)
-    if (ballY + ballRadius > canvas.height) {
-        // Reset ball
-        ballX = canvas.width / 2;
-        ballY = canvas.height / 2;
-        ballSpeedX = Math.random() > 0.5 ? 4 : -4;
-        ballSpeedY = 4;
+    // Bottom collision (miss)
+    if (ball.y + ball.radius > canvas.height) {
+        // PROMPT: Reset the ball to the center (with random x-direction) when it misses the paddle
+        ball.x = canvas.width / 2;
+        ball.y = canvas.height / 2;
+        ball.dx = 4 * (Math.random() > 0.5 ? 1 : -1);
+        ball.dy = 4;
     }
     
     requestAnimationFrame(update);
 }
 
-// Initialize score display
-updateScore();
+canvas.addEventListener('mousemove', (e) => {
+    const relativeX = e.clientX - canvas.offsetLeft;
+    if (relativeX > 0 && relativeX < canvas.width) {
+        paddle.x = relativeX - paddle.width / 2;
+    }
+});
 
-// Start the game
 update();

@@ -1,19 +1,13 @@
+/* PROMPT: Center the canvas on the page with a black background and white border */
 body {
+    margin: 0;
     background-color: black;
     display: flex;
-    flex-direction: column;
-    align-items: center;
     justify-content: center;
+    align-items: center;
     height: 100vh;
-    margin: 0;
 }
 
-h1 {
-    color: white;
-    text-align: center;
-}
-
-#pongCanvas {
+canvas {
     border: 1px solid white;
-    display: block;
 }

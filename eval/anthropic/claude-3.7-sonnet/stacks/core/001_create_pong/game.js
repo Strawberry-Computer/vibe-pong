@@ -1,113 +1,139 @@
-document.addEventListener('DOMContentLoaded', () => {
-    // Canvas setup
-    const canvas = document.getElementById('pongCanvas');
-    const ctx = canvas.getContext('2d');
-    
-    // Game variables
-    const paddleWidth = 100;
-    const paddleHeight = 10;
-    const ballRadius = 10;
-    const paddleSpeed = 8;
-    
-    // Game objects
-    const ball = {
-        x: canvas.width / 2,
-        y: canvas.height / 2,
-        dx: 4,
-        dy: -4,
-        radius: ballRadius
-    };
-    
-    const paddle = {
-        x: canvas.width / 2 - paddleWidth / 2,
-        y: canvas.height - paddleHeight - 10,
-        width: paddleWidth,
-        height: paddleHeight,
-        speed: paddleSpeed,
-        isMovingLeft: false,
-        isMovingRight: false
-    };
-    
-    // Key event handlers
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'ArrowLeft') paddle.isMovingLeft = true;
-        if (e.key === 'ArrowRight') paddle.isMovingRight = true;
-    });
-    
-    document.addEventListener('keyup', (e) => {
-        if (e.key === 'ArrowLeft') paddle.isMovingLeft = false;
-        if (e.key === 'ArrowRight') paddle.isMovingRight = false;
-    });
-    
-    // Draw functions
-    function drawBall() {
-        ctx.beginPath();
-        ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
-        ctx.fillStyle = 'white';
-        ctx.fill();
-        ctx.closePath();
+// PROMPT: Draw a white paddle (100px wide, 10px high) at the bottom, movable left/right with arrow keys.
+const canvas = document.getElementById('pongCanvas');
+const ctx = canvas.getContext('2d');
+
+const paddle = {
+    width: 100,
+    height: 10,
+    x: canvas.width / 2 - 50,
+    y: canvas.height - 20,
+    speed: 8,
+    dx: 0
+};
+
+// PROMPT: Draw a white ball (10px radius) starting at canvas center, moving diagonally with constant speed.
+const ball = {
+    x: canvas.width / 2,
+    y: canvas.height / 2,
+    radius: 10,
+    speed: 5,
+    dx: 4,
+    dy: -4
+};
+
+// PROMPT: Movable left/right with arrow keys
+function keyDown(e) {
+    if (e.key === 'Right' || e.key === 'ArrowRight') {
+        paddle.dx = paddle.speed;
+    } else if (e.key === 'Left' || e.key === 'ArrowLeft') {
+        paddle.dx = -paddle.speed;
+    }
+}
+
+function keyUp(e) {
+    if (
+        e.key === 'Right' ||
+        e.key === 'ArrowRight' ||
+        e.key === 'Left' ||
+        e.key === 'ArrowLeft'
+    ) {
+        paddle.dx = 0;
+    }
+}
+
+// PROMPT: Draw a white paddle
+function drawPaddle() {
+    ctx.beginPath();
+    ctx.rect(paddle.x, paddle.y, paddle.width, paddle.height);
+    ctx.fillStyle = 'white';
+    ctx.fill();
+    ctx.closePath();
+}
+
+// PROMPT: Draw a white ball
+function drawBall() {
+    ctx.beginPath();
+    ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+    ctx.fillStyle = 'white';
+    ctx.fill();
+    ctx.closePath();
+}
+
+// PROMPT: Detect paddle collision to bounce the ball back up
+function ballPaddleCollision() {
+    if (
+        ball.y + ball.radius > paddle.y &&
+        ball.y + ball.radius < paddle.y + paddle.height &&
+        ball.x > paddle.x &&
+        ball.x < paddle.x + paddle.width
+    ) {
+        ball.dy = -ball.dy;
+    }
+}
+
+// PROMPT: Bounce the ball off the top and side walls; reset to center if it hits the bottom
+function ballWallCollision() {
+    // Left and right walls
+    if (ball.x + ball.radius > canvas.width || ball.x - ball.radius < 0) {
+        ball.dx = -ball.dx;
     }
     
-    function drawPaddle() {
-        ctx.beginPath();
-        ctx.rect(paddle.x, paddle.y, paddle.width, paddle.height);
-        ctx.fillStyle = 'white';
-        ctx.fill();
-        ctx.closePath();
+    // Top wall
+    if (ball.y - ball.radius < 0) {
+        ball.dy = -ball.dy;
     }
     
-    // Update game state
-    function update() {
-        // Clear canvas
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
-        // Draw objects
-        drawBall();
-        drawPaddle();
-        
-        // Move paddle
-        if (paddle.isMovingLeft && paddle.x > 0) {
-            paddle.x -= paddle.speed;
-        }
-        
-        if (paddle.isMovingRight && paddle.x + paddle.width < canvas.width) {
-            paddle.x += paddle.speed;
-        }
-        
-        // Ball collision with top and sides
-        if (ball.y - ball.radius <= 0) {
-            ball.dy = -ball.dy; // Top collision
-        }
-        
-        if (ball.x + ball.radius >= canvas.width || ball.x - ball.radius <= 0) {
-            ball.dx = -ball.dx; // Side collision
-        }
-        
-        // Ball collision with paddle
-        if (ball.y + ball.radius >= paddle.y &&
-            ball.x >= paddle.x && 
-            ball.x <= paddle.x + paddle.width) {
-            ball.dy = -ball.dy;
-        }
-        
-        // Ball hits bottom (missed the paddle)
-        if (ball.y + ball.radius >= canvas.height) {
-            // Reset ball position
-            ball.x = canvas.width / 2;
-            ball.y = canvas.height / 2;
-            // Randomize direction slightly
-            ball.dx = (Math.random() > 0.5 ? 1 : -1) * 4;
-            ball.dy = -4;
-        }
-        
-        // Move ball
-        ball.x += ball.dx;
-        ball.y += ball.dy;
-        
-        // Continue animation
-        requestAnimationFrame(update);
+    // Bottom wall (miss)
+    if (ball.y + ball.radius > canvas.height) {
+        // Reset ball to center
+        ball.x = canvas.width / 2;
+        ball.y = canvas.height / 2;
+        // Reverse y direction
+        ball.dy = -ball.speed;
+        // Randomize x direction
+        ball.dx = Math.random() > 0.5 ? ball.speed : -ball.speed;
     }
+}
+
+function movePaddle() {
+    paddle.x += paddle.dx;
     
-    // Start the game loop
-    update();
-});
+    // Wall detection for paddle
+    if (paddle.x < 0) {
+        paddle.x = 0;
+    } else if (paddle.x + paddle.width > canvas.width) {
+        paddle.x = canvas.width - paddle.width;
+    }
+}
+
+function moveBall() {
+    ball.x += ball.dx;
+    ball.y += ball.dy;
+}
+
+function clearCanvas() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+// PROMPT: Use requestAnimationFrame for smooth animation
+function update() {
+    clearCanvas();
+    
+    drawPaddle();
+    drawBall();
+    
+    movePaddle();
+    moveBall();
+    
+    ballWallCollision();
+    ballPaddleCollision();
+    
+    requestAnimationFrame(update);
+}
+
+// Event listeners
+document.addEventListener('keydown', keyDown);
+document.addEventListener('keyup', keyUp);
+
+// Start the game
+update();

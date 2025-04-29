@@ -1,99 +1,98 @@
+// PROMPT: JS: Use Canvas API to: Draw a white paddle... 
 const canvas = document.getElementById('pongCanvas');
 const ctx = canvas.getContext('2d');
 
-const paddleWidth = 100;
-const paddleHeight = 10;
-let paddleX = (canvas.width - paddleWidth) / 2;
+// Paddle configuration
+const paddle = {
+    width: 100,
+    height: 10,
+    x: canvas.width / 2 - 50,
+    y: canvas.height - 20,
+    speed: 5
+};
 
-const ballRadius = 10;
-let ballX = canvas.width / 2;
-let ballY = canvas.height / 2;
-let ballSpeedX = 2;
-let ballSpeedY = -2;
+// Ball configuration
+const ball = {
+    radius: 10,
+    x: canvas.width / 2,
+    y: canvas.height / 2,
+    speed: 3,
+    dx: 3,
+    dy: -3
+};
 
+// Movement tracking
 let rightPressed = false;
 let leftPressed = false;
 
-document.addEventListener('keydown', keyDownHandler);
-document.addEventListener('keyup', keyUpHandler);
+// Event listeners for keyboard input
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight') rightPressed = true;
+    if (e.key === 'ArrowLeft') leftPressed = true;
+});
 
-function keyDownHandler(e) {
-    if (e.key === 'Right' || e.key === 'ArrowRight') {
-        rightPressed = true;
-    } else if (e.key === 'Left' || e.key === 'ArrowLeft') {
-        leftPressed = true;
+document.addEventListener('keyup', (e) => {
+    if (e.key === 'ArrowRight') rightPressed = false;
+    if (e.key === 'ArrowLeft') leftPressed = false;
+});
+
+// Collision detection between ball and paddle
+function collisionDetection() {
+    if (ball.y + ball.radius > paddle.y &&
+        ball.x + ball.radius > paddle.x &&
+        ball.x - ball.radius < paddle.x + paddle.width) {
+        ball.dy = -ball.dy;
     }
 }
 
-function keyUpHandler(e) {
-    if (e.key === 'Right' || e.key === 'ArrowRight') {
-        rightPressed = false;
-    } else if (e.key === 'Left' || e.key === 'ArrowLeft') {
-        leftPressed = false;
-    }
-}
+// Game loop
+function draw() {
+    // Clear canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-function drawPaddle() {
+    // Draw paddle
+    ctx.fillStyle = 'white';
+    ctx.fillRect(paddle.x, paddle.y, paddle.width, paddle.height);
+
+    // Draw ball
     ctx.beginPath();
-    ctx.rect(paddleX, canvas.height - paddleHeight, paddleWidth, paddleHeight);
-    ctx.fillStyle = '#fff';
+    ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+    ctx.fillStyle = 'white';
     ctx.fill();
     ctx.closePath();
-}
 
-function drawBall() {
-    ctx.beginPath();
-    ctx.arc(ballX, ballY, ballRadius, 0, Math.PI * 2);
-    ctx.fillStyle = '#fff';
-    ctx.fill();
-    ctx.closePath();
-}
-
-function update() {
     // Move paddle
-    if (rightPressed && paddleX + paddleWidth < canvas.width) {
-        paddleX += 5;
-    } else if (leftPressed && paddleX > 0) {
-        paddleX -= 5;
+    if (rightPressed && paddle.x + paddle.width < canvas.width) {
+        paddle.x += paddle.speed;
+    }
+    if (leftPressed && paddle.x > 0) {
+        paddle.x -= paddle.speed;
     }
 
     // Move ball
-    ballX += ballSpeedX;
-    ballY += ballSpeedY;
+    ball.x += ball.dx;
+    ball.y += ball.dy;
 
-    // Collision with top wall
-    if (ballY - ballRadius < 0) {
-        ballSpeedY = -ballSpeedY;
+    // Wall collision (top, left, right)
+    if (ball.x + ball.radius > canvas.width || ball.x - ball.radius < 0) {
+        ball.dx = -ball.dx;
+    }
+    if (ball.y - ball.radius < 0) {
+        ball.dy = -ball.dy;
     }
 
-    // Collision with left and right walls
-    if (ballX - ballRadius < 0 || ballX + ballRadius > canvas.width) {
-        ballSpeedX = -ballSpeedX;
+    // Paddle collision
+    collisionDetection();
+
+    // Reset ball if it misses
+    if (ball.y + ball.radius > canvas.height) {
+        ball.x = canvas.width / 2;
+        ball.y = canvas.height / 2;
+        ball.dy = -ball.dy;
     }
 
-    // Collision with paddle
-    if (ballY + ballRadius > canvas.height - paddleHeight &&
-        ballX > paddleX &&
-        ballX < paddleX + paddleWidth) {
-        ballSpeedY = -ballSpeedY;
-    }
-
-    // Check if ball missed
-    if (ballY + ballRadius > canvas.height) {
-        // Reset ball
-        ballX = canvas.width / 2;
-        ballY = canvas.height / 2;
-        ballSpeedX = 2;
-        ballSpeedY = -2;
-    }
+    requestAnimationFrame(draw);
 }
 
-function gameLoop() {
-    update();
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drawPaddle();
-    drawBall();
-    requestAnimationFrame(gameLoop);
-}
-
-gameLoop();
+// Start game
+draw();

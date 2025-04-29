@@ -1,152 +1,118 @@
-const canvas = document.getElementById('pongCanvas');
+const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const scoreDisplay = document.getElementById('score');
 
-// Game elements
-const paddleWidth = 100;
-const paddleHeight = 10;
-const ballRadius = 10;
-
-let playerPaddleX = (canvas.width - paddleWidth) / 2;
-let computerPaddleX = (canvas.width - paddleWidth) / 2;
-let ballX = canvas.width / 2;
-let ballY = canvas.height / 2;
-let ballSpeedX = 4;
-let ballSpeedY = 4;
+// PROMPT: Initialize a score variable starting at 0
 let score = 0;
 
-// Key states
-let rightPressed = false;
-let leftPressed = false;
+const ball = {
+    x: canvas.width / 2,
+    y: canvas.height / 2,
+    radius: 10,
+    dx: 4 * (Math.random() > 0.5 ? 1 : -1),
+    dy: 4
+};
 
-// Event listeners
-document.addEventListener('keydown', keyDownHandler);
-document.addEventListener('keyup', keyUpHandler);
+// PROMPT: Make sure there are 2 paddles: one for the user and one for the computer
+const userPaddle = {
+    width: 100,
+    height: 15,
+    x: canvas.width / 2 - 50,
+    y: canvas.height - 15
+};
 
-function keyDownHandler(e) {
-    if (e.key === 'Right' || e.key === 'ArrowRight') {
-        rightPressed = true;
-    } else if (e.key === 'Left' || e.key === 'ArrowLeft') {
-        leftPressed = true;
-    }
-}
-
-function keyUpHandler(e) {
-    if (e.key === 'Right' || e.key === 'ArrowRight') {
-        rightPressed = false;
-    } else if (e.key === 'Left' || e.key === 'ArrowLeft') {
-        leftPressed = false;
-    }
-}
-
-function drawPaddle(x, y) {
-    ctx.beginPath();
-    ctx.rect(x, y, paddleWidth, paddleHeight);
-    ctx.fillStyle = 'white';
-    ctx.fill();
-    ctx.closePath();
-}
+const computerPaddle = {
+    width: 100,
+    height: 15,
+    x: canvas.width / 2 - 50,
+    y: 0
+};
 
 function drawBall() {
     ctx.beginPath();
-    ctx.arc(ballX, ballY, ballRadius, 0, Math.PI * 2);
-    ctx.fillStyle = 'white';
+    ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+    ctx.fillStyle = '#fff';
     ctx.fill();
     ctx.closePath();
 }
 
-function updateScore() {
-    scoreDisplay.textContent = `Score: ${score}`;
+function drawPaddle(paddle) {
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(paddle.x, paddle.y, paddle.width, paddle.height);
 }
 
-function computerAI() {
-    // Simple AI to follow the ball
-    const computerPaddleCenter = computerPaddleX + paddleWidth / 2;
-    if (computerPaddleCenter < ballX - 10) {
-        computerPaddleX += 5;
-    } else if (computerPaddleCenter > ballX + 10) {
-        computerPaddleX -= 5;
+// PROMPT: Enhance the Pong game by having the computer player move the paddle automatically
+function moveComputerPaddle() {
+    // Simple AI: computer paddle follows the ball's x position
+    const computerPaddleCenter = computerPaddle.x + computerPaddle.width / 2;
+    if (computerPaddleCenter < ball.x - 10) {
+        computerPaddle.x += 5;
+    } else if (computerPaddleCenter > ball.x + 10) {
+        computerPaddle.x -= 5;
     }
-
-    // Keep paddle in bounds
-    if (computerPaddleX < 0) {
-        computerPaddleX = 0;
-    } else if (computerPaddleX > canvas.width - paddleWidth) {
-        computerPaddleX = canvas.width - paddleWidth;
+    
+    // Keep paddle within canvas bounds
+    if (computerPaddle.x < 0) {
+        computerPaddle.x = 0;
+    } else if (computerPaddle.x + computerPaddle.width > canvas.width) {
+        computerPaddle.x = canvas.width - computerPaddle.width;
     }
 }
 
 function update() {
-    // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    // Draw elements
-    drawPaddle(playerPaddleX, canvas.height - paddleHeight); // Player paddle
-    drawPaddle(computerPaddleX, 0); // Computer paddle (top)
     drawBall();
+    drawPaddle(userPaddle);
+    drawPaddle(computerPaddle);
     
-    // Move player paddle
-    if (rightPressed && playerPaddleX < canvas.width - paddleWidth) {
-        playerPaddleX += 7;
-    } else if (leftPressed && playerPaddleX > 0) {
-        playerPaddleX -= 7;
+    ball.x += ball.dx;
+    ball.y += ball.dy;
+    
+    // Wall collision (left/right)
+    if (ball.x + ball.radius > canvas.width || ball.x - ball.radius < 0) {
+        ball.dx = -ball.dx;
     }
     
-    // Computer AI movement
-    computerAI();
-    
-    // Move ball
-    ballX += ballSpeedX;
-    ballY += ballSpeedY;
-    
-    // Wall collision (left, right)
-    if (ballX - ballRadius < 0 || ballX + ballRadius > canvas.width) {
-        ballSpeedX = -ballSpeedX;
-    }
-    
-    // Paddle collision (player)
-    if (
-        ballY + ballRadius > canvas.height - paddleHeight &&
-        ballX > playerPaddleX &&
-        ballX < playerPaddleX + paddleWidth
-    ) {
-        ballSpeedY = -ballSpeedY;
+    // Paddle collision (user paddle)
+    if (ball.y + ball.radius > userPaddle.y && 
+        ball.x > userPaddle.x && ball.x < userPaddle.x + userPaddle.width) {
+        ball.dy = -ball.dy;
         score++;
-        updateScore();
+        scoreDisplay.textContent = `Score: ${score}`;
     }
     
-    // Paddle collision (computer)
-    if (
-        ballY - ballRadius < paddleHeight &&
-        ballX > computerPaddleX &&
-        ballX < computerPaddleX + paddleWidth
-    ) {
-        ballSpeedY = -ballSpeedY;
+    // Paddle collision (computer paddle)
+    if (ball.y - ball.radius < computerPaddle.y + computerPaddle.height && 
+        ball.x > computerPaddle.x && ball.x < computerPaddle.x + computerPaddle.width) {
+        ball.dy = -ball.dy;
     }
     
-    // Bottom wall (player miss)
-    if (ballY + ballRadius > canvas.height) {
-        // Reset ball
-        ballX = canvas.width / 2;
-        ballY = canvas.height / 2;
-        ballSpeedX = Math.random() > 0.5 ? 4 : -4;
-        ballSpeedY = 4;
+    // Bottom collision (miss)
+    if (ball.y + ball.radius > canvas.height) {
+        ball.x = canvas.width / 2;
+        ball.y = canvas.height / 2;
+        ball.dx = 4 * (Math.random() > 0.5 ? 1 : -1);
+        ball.dy = 4;
     }
     
-    // Top wall (computer miss)
-    if (ballY - ballRadius < 0) {
-        // Reset ball
-        ballX = canvas.width / 2;
-        ballY = canvas.height / 2;
-        ballSpeedX = Math.random() > 0.5 ? 4 : -4;
-        ballSpeedY = -4;
+    // Top collision (computer miss)
+    if (ball.y - ball.radius < 0) {
+        ball.x = canvas.width / 2;
+        ball.y = canvas.height / 2;
+        ball.dx = 4 * (Math.random() > 0.5 ? 1 : -1);
+        ball.dy = 4;
     }
     
+    moveComputerPaddle();
     requestAnimationFrame(update);
 }
 
-// Initialize score display
-updateScore();
+canvas.addEventListener('mousemove', (e) => {
+    const relativeX = e.clientX - canvas.offsetLeft;
+    if (relativeX > 0 && relativeX < canvas.width) {
+        userPaddle.x = relativeX - userPaddle.width / 2;
+    }
+});
 
-// Start the game
 update();

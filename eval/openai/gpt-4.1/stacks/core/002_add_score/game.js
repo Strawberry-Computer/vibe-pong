@@ -1,139 +1,95 @@
+// PROMPT: JS: Add scoring to Pong with score variable, increment on paddle hit, update display, don't reset on miss.
+
 const canvas = document.getElementById('pongCanvas');
 const ctx = canvas.getContext('2d');
+
+// PROMPT: JS: Add a score variable starting at 0.
+let score = 0;
 const scoreDiv = document.getElementById('score');
 
-// Paddle properties
 const paddleWidth = 100;
 const paddleHeight = 10;
-const paddleY = canvas.height - paddleHeight - 10;
 let paddleX = (canvas.width - paddleWidth) / 2;
+const paddleY = canvas.height - paddleHeight - 10;
 const paddleSpeed = 7;
+let rightPressed = false;
+let leftPressed = false;
 
-// Ball properties
 const ballRadius = 10;
 let ballX = canvas.width / 2;
 let ballY = canvas.height / 2;
 let ballSpeedX = 4;
 let ballSpeedY = -4;
 
-// Controls
-let leftPressed = false;
-let rightPressed = false;
+function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-// Score variable
-let score = 0;
-
-// Keyboard events
-document.addEventListener('keydown', (e) => {
-    if (e.code === 'ArrowLeft') {
-        leftPressed = true;
-    } else if (e.code === 'ArrowRight') {
-        rightPressed = true;
-    }
-});
-
-document.addEventListener('keyup', (e) => {
-    if (e.code === 'ArrowLeft') {
-        leftPressed = false;
-    } else if (e.code === 'ArrowRight') {
-        rightPressed = false;
-    }
-});
-
-// Draw paddle
-function drawPaddle() {
-    ctx.fillStyle = "#fff";
+    ctx.fillStyle = '#fff';
     ctx.fillRect(paddleX, paddleY, paddleWidth, paddleHeight);
-}
 
-// Draw ball
-function drawBall() {
     ctx.beginPath();
     ctx.arc(ballX, ballY, ballRadius, 0, Math.PI * 2);
-    ctx.fillStyle = "#fff";
+    ctx.fillStyle = '#fff';
     ctx.fill();
     ctx.closePath();
-}
 
-// Update score display in DOM
-function updateScoreDisplay() {
-    scoreDiv.textContent = `Score: ${score}`;
-}
-
-// Update game state
-function update() {
-    // Move paddle
-    if (leftPressed && !rightPressed) {
-        paddleX -= paddleSpeed;
-    } else if (rightPressed && !leftPressed) {
-        paddleX += paddleSpeed;
-    }
-    // Bound paddle within canvas
-    if (paddleX < 0) paddleX = 0;
-    if (paddleX + paddleWidth > canvas.width) paddleX = canvas.width - paddleWidth;
-    
-    // Move ball
-    ballX += ballSpeedX;
-    ballY += ballSpeedY;
-
-    // Ball collision with side walls
-    if (ballX - ballRadius < 0) {
-        ballX = ballRadius;
-        ballSpeedX = -ballSpeedX;
-    } else if (ballX + ballRadius > canvas.width) {
-        ballX = canvas.width - ballRadius;
+    if (ballX + ballRadius > canvas.width || ballX - ballRadius < 0) {
         ballSpeedX = -ballSpeedX;
     }
-
-    // Ball collision with top wall
     if (ballY - ballRadius < 0) {
-        ballY = ballRadius;
         ballSpeedY = -ballSpeedY;
     }
 
-    // Ball collision with paddle
+    // PROMPT: Increment the score when the ball hits the paddle.
     if (
         ballY + ballRadius >= paddleY &&
         ballY + ballRadius <= paddleY + paddleHeight &&
         ballX >= paddleX &&
         ballX <= paddleX + paddleWidth
     ) {
-        ballY = paddleY - ballRadius;
         ballSpeedY = -ballSpeedY;
-        // Increment score when hitting paddle
-        score++;
+        ballY = paddleY - ballRadius;
+        score += 1;
+    }
+    // PROMPT: Reset the ball to the center (with random x-direction) when it misses the paddle (hits bottom), without resetting the score.
+    else if (ballY + ballRadius > canvas.height) {
+        ballX = canvas.width / 2;
+        ballY = canvas.height / 2;
+        ballSpeedX = 4 * (Math.random() < 0.5 ? 1 : -1);
+        ballSpeedY = -4;
     }
 
-    // Ball falls below paddle (miss)
-    if (ballY - ballRadius > canvas.height) {
-        resetBall();
+    ballX += ballSpeedX;
+    ballY += ballSpeedY;
+
+    if (rightPressed && paddleX + paddleWidth < canvas.width) {
+        paddleX += paddleSpeed;
+    } else if (leftPressed && paddleX > 0) {
+        paddleX -= paddleSpeed;
     }
 
-    // Update score display every frame
-    updateScoreDisplay();
+    // PROMPT: Update the score display in the DOM each frame.
+    scoreDiv.textContent = "Score: " + score;
+
+    requestAnimationFrame(draw);
 }
 
-// Reset ball to center (with random x-direction), do not reset score
-function resetBall() {
-    ballX = canvas.width / 2;
-    ballY = canvas.height / 2;
-    ballSpeedX = 4 * (Math.random() > 0.5 ? 1 : -1);
-    ballSpeedY = -4;
-}
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowRight') {
+        rightPressed = true;
+    }
+    if (e.key === 'ArrowLeft') {
+        leftPressed = true;
+    }
+});
 
-// Render everything
-function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drawPaddle();
-    drawBall();
-}
+document.addEventListener('keyup', function(e) {
+    if (e.key === 'ArrowRight') {
+        rightPressed = false;
+    }
+    if (e.key === 'ArrowLeft') {
+        leftPressed = false;
+    }
+});
 
-function loop() {
-    update();
-    draw();
-    requestAnimationFrame(loop);
-}
-
-// Initialize score display and start game loop
-updateScoreDisplay();
-loop();
+draw();

@@ -1,22 +1,25 @@
+/* PROMPT: CSS: Center the canvas on the page with a black background and white border. */
 body {
-    background: #222;
-    color: #fff;
-    text-align: center;
+    background: #111;
     margin: 0;
-    font-family: Arial, Helvetica, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
 h1 {
-    margin-top: 40px;
+    color: #fff;
+    font-family: sans-serif;
     margin-bottom: 20px;
-    font-size: 2.5rem;
-    letter-spacing: 2px;
+    text-shadow: 0 2px 6px #000;
 }
 
 #pongCanvas {
     display: block;
     margin: 0 auto;
     background: #000;
-    border: 3px solid #fff;
-    box-shadow: 0 4px 32px #000a;
+    border: 2px solid #fff;
+    box-shadow: 0 0 16px #222;
 }

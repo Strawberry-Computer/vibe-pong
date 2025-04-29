@@ -1,80 +1,42 @@
+// PROMPT: Draw a white paddle (100px wide, 10px high) at the bottom, movable left/right with arrow keys
 const canvas = document.getElementById('pongCanvas');
 const ctx = canvas.getContext('2d');
 
-// Game objects
 const paddle = {
     width: 100,
     height: 10,
-    x: 350,
-    y: canvas.height - 20,
-    speed: 8,
-    dx: 0
+    x: canvas.width / 2 - 50,
+    y: canvas.height - 20
 };
 
+// PROMPT: Draw a white ball (10px radius) starting at canvas center, moving diagonally with constant speed
 const ball = {
     x: canvas.width / 2,
     y: canvas.height / 2,
     radius: 10,
-    speed: 4,
     dx: 4,
     dy: -4
 };
 
-// Controls
-let rightPressed = false;
-let leftPressed = false;
-
-// Event listeners
-document.addEventListener('keydown', keyDownHandler);
-document.addEventListener('keyup', keyUpHandler);
-
-function keyDownHandler(e) {
-    if (e.key === 'Right' || e.key === 'ArrowRight') {
-        rightPressed = true;
-    } else if (e.key === 'Left' || e.key === 'ArrowLeft') {
-        leftPressed = true;
+// PROMPT: movable left/right with arrow keys
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft' && paddle.x > 0) {
+        paddle.x -= 20;
     }
-}
-
-function keyUpHandler(e) {
-    if (e.key === 'Right' || e.key === 'ArrowRight') {
-        rightPressed = false;
-    } else if (e.key === 'Left' || e.key === 'ArrowLeft') {
-        leftPressed = false;
+    if (e.key === 'ArrowRight' && paddle.x < canvas.width - paddle.width) {
+        paddle.x += 20;
     }
+});
+
+function resetBall() {
+    ball.x = canvas.width / 2;
+    ball.y = canvas.height / 2;
+    ball.dx = 4;
+    ball.dy = -4;
 }
 
-// Drawing functions
-function drawPaddle() {
-    ctx.beginPath();
-    ctx.rect(paddle.x, paddle.y, paddle.width, paddle.height);
-    ctx.fillStyle = 'white';
-    ctx.fill();
-    ctx.closePath();
-}
-
-function drawBall() {
-    ctx.beginPath();
-    ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
-    ctx.fillStyle = 'white';
-    ctx.fill();
-    ctx.closePath();
-}
-
-// Game logic
-function movePaddle() {
-    if (rightPressed && paddle.x < canvas.width - paddle.width) {
-        paddle.x += paddle.speed;
-    } else if (leftPressed && paddle.x > 0) {
-        paddle.x -= paddle.speed;
-    }
-}
-
-function moveBall() {
-    ball.x += ball.dx;
-    ball.y += ball.dy;
-
-    // Wall collision detection
+function detectCollisions() {
+    // PROMPT: Bounce the ball off the top and side walls
     if (ball.x + ball.radius > canvas.width || ball.x - ball.radius < 0) {
         ball.dx = -ball.dx;
     }
@@ -82,38 +44,38 @@ function moveBall() {
         ball.dy = -ball.dy;
     }
 
-    // Paddle collision detection
-    if (ball.y + ball.radius > paddle.y &&
-        ball.x > paddle.x &&
-        ball.x < paddle.x + paddle.width) {
-        ball.dy = -ball.dy;
-    }
-
-    // Ball reset if it goes below paddle
+    // PROMPT: reset to center if it hits the bottom (misses paddle)
     if (ball.y + ball.radius > canvas.height) {
         resetBall();
     }
+
+    // PROMPT: Detect paddle collision to bounce the ball back up
+    if (ball.y + ball.radius > paddle.y && 
+        ball.x > paddle.x && 
+        ball.x < paddle.x + paddle.width) {
+        ball.dy = -ball.dy;
+    }
 }
 
-function resetBall() {
-    ball.x = canvas.width / 2;
-    ball.y = canvas.height / 2;
-    ball.dx = ball.speed;
-    ball.dy = -ball.speed;
-}
-
-// Game loop
-function update() {
+function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    drawPaddle();
-    drawBall();
+    ctx.fillStyle = 'white';
+    ctx.fillRect(paddle.x, paddle.y, paddle.width, paddle.height);
     
-    movePaddle();
-    moveBall();
-    
-    requestAnimationFrame(update);
+    ctx.beginPath();
+    ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+    ctx.fillStyle = 'white';
+    ctx.fill();
+    ctx.closePath();
+
+    ball.x += ball.dx;
+    ball.y += ball.dy;
+
+    detectCollisions();
+
+    // PROMPT: Use requestAnimationFrame for smooth animation
+    requestAnimationFrame(draw);
 }
 
-// Start the game
-update();
+draw();

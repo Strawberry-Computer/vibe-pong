@@ -1,80 +1,73 @@
-const canvas = document.getElementById('pongCanvas');
+const canvas = document.getElementById('pongCanvas'); // PROMPT: JS: Use Canvas API to draw the game elements.
 const ctx = canvas.getContext('2d');
-const scoreDisplay = document.getElementById('score');
 
-const paddleWidth = 100;
-const paddleHeight = 10;
-const ballRadius = 10;
-
+let paddleWidth = 100; // PROMPT: JS: Draw a white paddle (100px wide, 10px high).
+let paddleHeight = 10;
 let paddleX = (canvas.width - paddleWidth) / 2;
+let ballRadius = 10; // PROMPT: JS: Draw a white ball (10px radius).
 let ballX = canvas.width / 2;
 let ballY = canvas.height / 2;
-let ballSpeedX = 4;
-let ballSpeedY = -4;
-const paddleSpeed = 20;
+let ballDX = 2; // PROMPT: JS: Moving diagonally with constant speed.
+let ballDY = -2;
+let score = 0; // PROMPT: JS: Initialize a score variable starting at 0.
 
-let score = 0;
-
-function drawPaddle() {
-    ctx.fillStyle = 'white';
+function drawPaddle() { // PROMPT: JS: Draw a white paddle.
+    ctx.fillStyle = "white";
     ctx.fillRect(paddleX, canvas.height - paddleHeight, paddleWidth, paddleHeight);
 }
 
-function drawBall() {
-    ctx.fillStyle = 'white';
+function drawBall() { // PROMPT: JS: Draw a white ball.
     ctx.beginPath();
     ctx.arc(ballX, ballY, ballRadius, 0, Math.PI * 2);
+    ctx.fillStyle = "white";
     ctx.fill();
     ctx.closePath();
 }
 
-function updateScore() {
-    scoreDisplay.textContent = `Score: ${score}`;
+function updateScore() { // PROMPT: JS: Update the score display in the DOM each frame.
+    document.getElementById('score').innerText = `Score: ${score}`;
 }
 
-function update() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-    drawPaddle();
-    drawBall();
-    
-    // Ball movement
-    ballX += ballSpeedX;
-    ballY += ballSpeedY;
-    
-    // Bounce off walls
-    if (ballY + ballRadius > canvas.height) {
-        // Reset ball to the center without resetting score
+function detectCollision() { // PROMPT: JS: Detect paddle collision to bounce the ball back up.
+    if (ballY + ballDY + ballRadius > canvas.height - paddleHeight && ballX > paddleX && ballX < paddleX + paddleWidth) {
+        ballDY = -ballDY;
+        score++; // PROMPT: JS: Increment the score when the ball hits the paddle.
+    } else if (ballY + ballDY + ballRadius > canvas.height) { // PROMPT: JS: Reset to center if it hits the bottom.
         ballX = canvas.width / 2;
         ballY = canvas.height / 2;
-        ballSpeedX = 4 * (Math.random() < 0.5 ? 1 : -1);
-        ballSpeedY = -4;
+        ballDX = 2; // Reset ball direction
+        ballDY = -2;
     }
-    
-    if (ballY - ballRadius < 0) {
-        ballSpeedY = -ballSpeedY;
-    }
-    
-    if (ballX + ballRadius > canvas.width || ballX - ballRadius < 0) {
-        ballSpeedX = -ballSpeedX;
-    }
-    
-    // Paddle collision
-    if (ballY + ballRadius >= canvas.height - paddleHeight && ballX >= paddleX && ballX <= paddleX + paddleWidth) {
-        ballSpeedY = -ballSpeedY;
-        score++;
-        updateScore();
-    }
-    
-    requestAnimationFrame(update);
 }
 
-document.addEventListener('keydown', (event) => {
-    if (event.key === 'ArrowLeft' && paddleX > 0) {
-        paddleX -= paddleSpeed;
-    } else if (event.key === 'ArrowRight' && paddleX < canvas.width - paddleWidth) {
-        paddleX += paddleSpeed;
-    }
-});
+function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
+    drawBall(); // Draw ball
+    drawPaddle(); // Draw paddle
+    detectCollision(); // Check for collisions
+    updateScore(); // PROMPT: JS: Update the score display in the DOM each frame.
 
-update();
+    // Bounce ball off top and side walls 
+    if (ballX + ballDX + ballRadius > canvas.width || ballX + ballDX - ballRadius < 0) {
+        ballDX = -ballDX;
+    }
+    if (ballY + ballDY - ballRadius < 0) {
+        ballDY = -ballDY;
+    }
+
+    ballX += ballDX; // Update ball position
+    ballY += ballDY; // Update ball position
+
+    requestAnimationFrame(draw); // PROMPT: JS: Use requestAnimationFrame for smooth animation.
+}
+
+function movePaddle(event) {
+    if (event.key === "ArrowLeft" && paddleX > 0) { // PROMPT: JS: Movable left/right with arrow keys.
+        paddleX -= 20;
+    } else if (event.key === "ArrowRight" && paddleX < canvas.width - paddleWidth) {
+        paddleX += 20;
+    }
+}
+
+document.addEventListener("keydown", movePaddle); // Listen for key events
+draw(); // Start the game loop

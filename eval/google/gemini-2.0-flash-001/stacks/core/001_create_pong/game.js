@@ -16,16 +16,10 @@ const ballRadius = 10;
 let ballSpeedX = 2;
 let ballSpeedY = 2;
 
-// PROMPT: JS:   - Initialize a score variable starting at 0.
-let score = 0;
 // PROMPT: Detect paddle collision to bounce the ball back up.
 function collisionDetection() {
     if (ballX + ballRadius > paddleX && ballX - ballRadius < paddleX + paddleWidth && ballY + ballRadius > paddleY) {
         ballSpeedY = -ballSpeedY;
-        // PROMPT: JS:   - Increment the score when the ball hits the paddle.
-        score++;
-        // PROMPT: JS:   - Update the score display in the DOM each frame.
-        document.getElementById('score').innerText = 'Score: ' + score;
     }
 }
 
@@ -59,11 +53,9 @@ function draw() {
     // PROMPT: Bounce the ball off the top and side walls; reset to center if it hits the bottom (misses paddle).
     // Bounce off top/bottom
     if (ballY + ballRadius > canvas.height) {
-        // PROMPT: JS:   - Reset the ball to the center (with random x-direction) when it misses the paddle (hits bottom), without resetting the score.
         // Reset position
         ballX = canvas.width / 2;
         ballY = canvas.height / 2;
-        ballSpeedX = (Math.random() > 0.5 ? 2 : -2);
     }
     if (ballY - ballRadius < 0) {
         ballSpeedY = -ballSpeedY;
@@ -80,8 +72,6 @@ function draw() {
     } else if (leftPressed && paddleX > 0) {
         paddleX -= paddleSpeed;
     }
-    // PROMPT: JS:   - Update the score display in the DOM each frame.
-    document.getElementById('score').innerText = 'Score: ' + score;
 
     // PROMPT: Use requestAnimationFrame for smooth animation.
     requestAnimationFrame(draw);

@@ -1,46 +1,42 @@
-// Get canvas and context
+// PROMPT: Draw a white paddle (100px wide, 10px high) at the bottom, movable left/right with arrow keys.
 const canvas = document.getElementById('pongCanvas');
 const ctx = canvas.getContext('2d');
 
-// Score tracking
+const paddleWidth = 100;
+const paddleHeight = 10;
+const ballRadius = 10;
+
+let paddleX = (canvas.width - paddleWidth) / 2;
+let ballX = canvas.width / 2;
+let ballY = canvas.height / 2;
+
+// PROMPT: Draw a white ball (10px radius) starting at canvas center, moving diagonally with constant speed.
+let ballSpeedX = 4;
+let ballSpeedY = -4;
+
+// PROMPT: Initialize a score variable starting at 0.
 let score = 0;
-const scoreElement = document.getElementById('score');
 
-// Game objects
-const ball = {
-    x: canvas.width / 2,
-    y: canvas.height / 2,
-    radius: 10,
-    dx: 4,
-    dy: 4,
-    color: 'white'
-};
+const paddleSpeed = 8;
 
-const userPaddle = {
-    width: 100,
-    height: 10,
-    x: canvas.width / 2 - 50, // Center the paddle
-    y: canvas.height - 20, // Position from bottom
-    speed: 8,
-    color: 'white'
-};
+// PROMPT: Enhance the Pong game by having the computer player move the paddle automatically.
+let computerPaddleX = (canvas.width - paddleWidth) / 2;
+const computerPaddleY = paddleHeight;
+const computerPaddleSpeed = 4;
 
-const computerPaddle = {
-    width: 100,
-    height: 10,
-    x: canvas.width / 2 - 50, // Center the paddle
-    y: 20, // Position from top
-    speed: 5, // Slightly slower than player for fairness
-    color: 'red'
-};
+// PROMPT: Use requestAnimationFrame for smooth animation.
+function gameLoop() {
+    update();
+    draw();
+    requestAnimationFrame(gameLoop);
+}
 
-// Keyboard controls
-let rightPressed = false;
-let leftPressed = false;
-
-// Event listeners
+// PROMPT: movable left/right with arrow keys.
 document.addEventListener('keydown', keyDownHandler);
 document.addEventListener('keyup', keyUpHandler);
+
+let rightPressed = false;
+let leftPressed = false;
 
 function keyDownHandler(e) {
     if (e.key === 'Right' || e.key === 'ArrowRight') {
@@ -58,146 +54,100 @@ function keyUpHandler(e) {
     }
 }
 
-// Update score display
+// PROMPT: Update the score display in the DOM each frame.
 function updateScoreDisplay() {
-    scoreElement.textContent = `Score: ${score}`;
+    document.getElementById('score').textContent = `Score: ${score}`;
 }
 
-// Draw functions
-function drawBall() {
-    ctx.beginPath();
-    ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
-    ctx.fillStyle = ball.color;
-    ctx.fill();
-    ctx.closePath();
-}
-
-function drawUserPaddle() {
-    ctx.beginPath();
-    ctx.rect(userPaddle.x, userPaddle.y, userPaddle.width, userPaddle.height);
-    ctx.fillStyle = userPaddle.color;
-    ctx.fill();
-    ctx.closePath();
-}
-
-function drawComputerPaddle() {
-    ctx.beginPath();
-    ctx.rect(computerPaddle.x, computerPaddle.y, computerPaddle.width, computerPaddle.height);
-    ctx.fillStyle = computerPaddle.color;
-    ctx.fill();
-    ctx.closePath();
-}
-
-// Reset ball to center
-function resetBall() {
-    ball.x = canvas.width / 2;
-    ball.y = canvas.height / 2;
-    // Randomize direction slightly
-    ball.dx = (Math.random() > 0.5 ? 1 : -1) * 4;
-    ball.dy = (Math.random() > 0.5 ? 1 : -1) * 4;
-}
-
-// Computer AI to move paddle
-function moveComputerPaddle() {
-    // Simple AI: Move toward the ball's x position
-    const paddleCenter = computerPaddle.x + computerPaddle.width / 2;
-    
-    // Add a little "reaction time" by not always following the ball perfectly
-    if (Math.abs(paddleCenter - ball.x) > 20) {
-        if (paddleCenter < ball.x) {
-            // Move right
-            computerPaddle.x += computerPaddle.speed;
-            // Don't go off screen
-            if (computerPaddle.x + computerPaddle.width > canvas.width) {
-                computerPaddle.x = canvas.width - computerPaddle.width;
-            }
-        } else {
-            // Move left
-            computerPaddle.x -= computerPaddle.speed;
-            // Don't go off screen
-            if (computerPaddle.x < 0) {
-                computerPaddle.x = 0;
-            }
-        }
-    }
-}
-
-// Update game state
 function update() {
-    // Clear canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-    // Draw objects
-    drawBall();
-    drawUserPaddle();
-    drawComputerPaddle();
-    
-    // Move user paddle
-    if (rightPressed && userPaddle.x < canvas.width - userPaddle.width) {
-        userPaddle.x += userPaddle.speed;
-    } else if (leftPressed && userPaddle.x > 0) {
-        userPaddle.x -= userPaddle.speed;
+    // PROMPT: movable left/right with arrow keys.
+    if (rightPressed && paddleX < canvas.width - paddleWidth) {
+        paddleX += paddleSpeed;
+    } else if (leftPressed && paddleX > 0) {
+        paddleX -= paddleSpeed;
     }
-    
-    // Move computer paddle with AI
-    moveComputerPaddle();
-    
-    // Ball collision with walls
-    if (ball.x + ball.dx > canvas.width - ball.radius || ball.x + ball.dx < ball.radius) {
-        ball.dx = -ball.dx;
+
+    // PROMPT: Enhance the Pong game by having the computer player move the paddle automatically.
+    if (computerPaddleX + paddleWidth / 2 < ballX) {
+        computerPaddleX += computerPaddleSpeed;
+    } else if (computerPaddleX + paddleWidth / 2 > ballX) {
+        computerPaddleX -= computerPaddleSpeed;
     }
-    
-    // Ball collision with user paddle
+
+    // PROMPT: Make sure the computer paddle stays within bounds
+    if (computerPaddleX < 0) {
+        computerPaddleX = 0;
+    } else if (computerPaddleX + paddleWidth > canvas.width) {
+        computerPaddleX = canvas.width - paddleWidth;
+    }
+
+    ballX += ballSpeedX;
+    ballY += ballSpeedY;
+
+    // PROMPT: Bounce the ball off the side walls
+    if (ballX + ballRadius > canvas.width || ballX - ballRadius < 0) {
+        ballSpeedX = -ballSpeedX;
+    }
+
+    // PROMPT: Detect computer paddle collision
     if (
-        ball.y + ball.dy > userPaddle.y - ball.radius &&
-        ball.y + ball.dy < userPaddle.y + userPaddle.height &&
-        ball.x > userPaddle.x &&
-        ball.x < userPaddle.x + userPaddle.width
+        ballY - ballRadius < computerPaddleY + paddleHeight &&
+        ballX > computerPaddleX &&
+        ballX < computerPaddleX + paddleWidth
     ) {
-        ball.dy = -ball.dy;
-        // Increment score
-        score++;
-        // Update score display
-        updateScoreDisplay();
+        ballSpeedY = -ballSpeedY;
     }
-    
-    // Ball collision with computer paddle
+
+    // PROMPT: Detect paddle collision to bounce the ball back up.
     if (
-        ball.y + ball.dy < computerPaddle.y + computerPaddle.height + ball.radius &&
-        ball.y + ball.dy > computerPaddle.y &&
-        ball.x > computerPaddle.x &&
-        ball.x < computerPaddle.x + computerPaddle.width
+        ballY + ballRadius > canvas.height - paddleHeight &&
+        ballX > paddleX &&
+        ballX < paddleX + paddleWidth
     ) {
-        ball.dy = -ball.dy;
-    }
-    
-    // Ball hits bottom (missed by user)
-    if (ball.y + ball.dy > canvas.height - ball.radius) {
-        // Reset ball to center, lose a point if score > 0
-        if (score > 0) {
-            score--;
-        }
-        updateScoreDisplay();
-        resetBall();
-    }
-    
-    // Ball hits top (missed by computer)
-    if (ball.y + ball.dy < ball.radius) {
-        // Reset ball to center, add a point
+        ballSpeedY = -ballSpeedY;
+        // PROMPT: Increment the score when the ball hits the paddle.
         score++;
         updateScoreDisplay();
-        resetBall();
     }
-    
-    // Update ball position
-    ball.x += ball.dx;
-    ball.y += ball.dy;
-    
-    // Continue animation
-    requestAnimationFrame(update);
+
+    // PROMPT: Reset the ball to the center (with random x-direction) when it misses the paddle (hits bottom), without resetting the score.
+    if (ballY + ballRadius > canvas.height) {
+        ballX = canvas.width / 2;
+        ballY = canvas.height / 2;
+        // PROMPT: with random x-direction
+        ballSpeedX = Math.random() > 0.5 ? 4 : -4;
+        ballSpeedY = -4;
+    }
 }
+
+function draw() {
+    // Clear the canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // PROMPT: Draw a white ball (10px radius)
+    ctx.beginPath();
+    ctx.arc(ballX, ballY, ballRadius, 0, Math.PI * 2);
+    ctx.fillStyle = 'white';
+    ctx.fill();
+    ctx.closePath();
+
+    // PROMPT: Draw a white paddle (100px wide, 10px high) at the bottom
+    ctx.beginPath();
+    ctx.rect(paddleX, canvas.height - paddleHeight, paddleWidth, paddleHeight);
+    ctx.fillStyle = 'white';
+    ctx.fill();
+    ctx.closePath();
+
+    // PROMPT: Draw the computer paddle at the top
+    ctx.beginPath();
+    ctx.rect(computerPaddleX, 0, paddleWidth, paddleHeight);
+    ctx.fillStyle = 'white';
+    ctx.fill();
+    ctx.closePath();
+}
+
+// PROMPT: Update the score display in the DOM each frame.
+updateScoreDisplay();
 
 // Start the game
-updateScoreDisplay();
-resetBall();
-update();
+gameLoop();

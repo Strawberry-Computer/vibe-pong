@@ -1,4 +1,12 @@
-Starting evaluation at Fri Apr 18 02:09:52 PDT 2025
+Starting evaluation at Mon Apr 28 19:03:45 PDT 2025
 ✓ Success: openai/gpt-4
+✓ Success: openai/gpt-4.1
+✓ Success: openai/gpt-4o-mini
 ✓ Success: anthropic/claude-3.5-sonnet
 ✓ Success: anthropic/claude-3.7-sonnet
+✓ Success: google/gemini-2.0-flash-001
+✗ Failed: google/gemini-2.5-pro-exp-03-25:free (exit code: 1)
+✓ Success: deepseek/deepseek-chat-v3-0324:free
+✓ Success: deepseek/deepseek-r1:free
+✓ Success: qwen/qwen3-30b-a3b:free
+✗ Failed: qwen/qwen3-235b-a22b:free (exit code: 1)

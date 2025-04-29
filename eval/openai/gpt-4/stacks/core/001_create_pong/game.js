@@ -1,40 +1,15 @@
-var canvas = document.getElementById("pongCanvas");
-var ctx = canvas.getContext("2d");
+let canvas = document.getElementById('pongCanvas');  <!-- PROMPT: Basic structure with a canvas element -->
+let ctx = canvas.getContext('2d');
 
-var paddleWidth = 100;
-var paddleHeight = 10;
-var paddleX = (canvas.width - paddleWidth) / 2;
-var rightPressed = false;
-var leftPressed = false;
-
-var ballRadius = 10;
-var x = canvas.width / 2;
-var y = canvas.height - 30;
-var dx = 2;
-var dy = -2;
-
-document.addEventListener("keydown", keyDownHandler, false);
-document.addEventListener("keyup", keyUpHandler, false);
-
-function keyDownHandler(e) {
-    if (e.key == "Right" || e.key == "ArrowRight") {
-        rightPressed = true;
-    } else if (e.key == "Left" || e.key == "ArrowLeft") {
-        leftPressed = true;
-    }
-}
-
-function keyUpHandler(e) {
-    if (e.key == "Right" || e.key == "ArrowRight") {
-        rightPressed = false;
-    } else if (e.key == "Left" || e.key == "ArrowLeft") {
-        leftPressed = false;
-    }
-}
+let paddleWidth = 100, paddleHeight = 10;
+let paddleX = (canvas.width - paddleWidth) / 2;
+let ballRadius = 10;
+let x = canvas.width / 2, y = canvas.height - 30;  <!-- PROMPT: Draw a white ball starting at canvas center -->
+let dx = 2, dy = -2;
 
 function drawPaddle() {
     ctx.beginPath();
-    ctx.rect(paddleX, canvas.height - paddleHeight, paddleWidth, paddleHeight);
+    ctx.rect(paddleX, canvas.height - paddleHeight, paddleWidth, paddleHeight);  <!-- PROMPT: Draw a white paddle at the bottom -->
     ctx.fillStyle = "#FFFFFF";
     ctx.fill();
     ctx.closePath();
@@ -42,40 +17,37 @@ function drawPaddle() {
 
 function drawBall() {
     ctx.beginPath();
-    ctx.arc(x, y, ballRadius, 0, Math.PI * 2);
-    ctx.fillStyle = "white";
+    ctx.arc(x, y, ballRadius, 0, Math.PI*2);  <!-- PROMPT: Draw a white ball -->
+    ctx.fillStyle = "#FFFFFF";
     ctx.fill();
     ctx.closePath();
 }
 
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drawPaddle();
     drawBall();
-    x += dx;
-    y += dy;
+    drawPaddle();
 
-    if (y + dy < ballRadius) {
-        dy = -dy;
-    } else if (y + dy > canvas.height - ballRadius) {
-        if (x > paddleX && x < paddleX + paddleWidth) {
-            dy = -dy;
-        } else {
+    if(x + dx > canvas.width-ballRadius || x + dx < ballRadius) {
+        dx = -dx;  <!-- PROMPT: bounce the ball off the side walls -->
+    }
+    if(y + dy < ballRadius) {
+        dy = -dy;  <!-- PROMPT: bounce the ball off the top wall -->
+    }
+    else if(y + dy > canvas.height-ballRadius) {
+        if(x > paddleX && x < paddleX + paddleWidth) {
+            dy = -dy;  <!-- PROMPT: detect paddle collision to bounce the ball back up -->
+        }
+        else {
             x = canvas.width / 2;
-            y = canvas.height - 30;
+            y = canvas.height / 2;  <!-- PROMPT: reset ball to center if it hits the bottom -->
         }
     }
 
-    if (x + dx > canvas.width - ballRadius || x + dx < ballRadius) {
-        dx = -dx;
-    }
+    x += dx;
+    y += dy;
 
-    if (rightPressed && paddleX < canvas.width - paddleWidth) {
-        paddleX += 7;
-    } else if (leftPressed && paddleX > 0) {
-        paddleX -= 7;
-    }
-    requestAnimationFrame(draw);
+    requestAnimationFrame(draw);  <!-- PROMPT: Use requestAnimationFrame for smooth animation -->
 }
 
 draw();

@@ -1,12 +1,12 @@
 body {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background-color: black;
-    margin: 0;
+    background-color: black; /* PROMPT: CSS: Center the canvas on the page with a black background. */
+    display: flex; /* PROMPT: CSS: Center the canvas on the page. */
+    justify-content: center; /* PROMPT: CSS: Center the canvas on the page. */
+    align-items: center; /* PROMPT: CSS: Center the canvas on the page. */
+    height: 100vh; /* PROMPT: CSS: Center the canvas on the page. */
+    margin: 0; /* PROMPT: CSS: Center the canvas on the page. */
 }
 
 canvas {
-    border: 2px solid white;
+    border: 2px solid white; /* PROMPT: CSS: Center the canvas on the page with a white border. */
 }

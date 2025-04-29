@@ -1,103 +1,79 @@
-var canvas = document.getElementById("pongCanvas");
-var ctx = canvas.getContext("2d");
+// PROMPT: Basic structure with a canvas element (id="pongCanvas", 800x400px)
+let canvas = document.getElementById('pongCanvas');
+let ctx = canvas.getContext('2d');
 
-var paddleWidth = 100;
-var paddleHeight = 10;
-var playerPaddleX = (canvas.width - paddleWidth) / 2;
-var aiPaddleX = (canvas.width - paddleWidth) / 2;
-var rightPressed = false;
-var leftPressed = false;
+// PROMPT: Initialize a score variable starting at 0
+let scoreDom = document.getElementById('score');
 
-var ballRadius = 10;
-var x = canvas.width / 2;
-var y = canvas.height - 30;
-var dx = 2;
-var dy = -2;
+let paddleWidth = 100, paddleHeight = 10;
+let paddleX = (canvas.width - paddleWidth) / 2;
+let ballRadius = 10;
 
-var score = 0;
-var scoreDisplay = document.getElementById("score");
+// PROMPT: Draw a white ball starting at canvas center
+let x = canvas.width / 2, y = canvas.height - 30;
+let dx = 2, dy = -2;
 
-document.addEventListener("keydown", keyDownHandler, false);
-document.addEventListener("keyup", keyUpHandler, false);
+// PROMPT: Initialize a score variable starting at 0
+let score = 0;
 
-function keyDownHandler(e) {
-    if (e.key == "Right" || e.key == "ArrowRight") {
-        rightPressed = true;
-    } else if (e.key == "Left" || e.key == "ArrowLeft") {
-        leftPressed = true;
-    }
-}
-
-function keyUpHandler(e) {
-    if (e.key == "Right" || e.key == "ArrowRight") {
-        rightPressed = false;
-    } else if (e.key == "Left" || e.key == "ArrowLeft") {
-        leftPressed = false;
-    }
-}
-
+// draw a white paddle at the bottom
 function drawPaddle() {
     ctx.beginPath();
-    ctx.rect(playerPaddleX, canvas.height - paddleHeight, paddleWidth, paddleHeight);
-    ctx.rect(aiPaddleX, 0, paddleWidth, paddleHeight); //draw ai paddle
+    ctx.rect(paddleX, canvas.height - paddleHeight, paddleWidth, paddleHeight); 
     ctx.fillStyle = "#FFFFFF";
     ctx.fill();
     ctx.closePath();
 }
 
+// draw a white ball
 function drawBall() {
     ctx.beginPath();
-    ctx.arc(x, y, ballRadius, 0, Math.PI * 2);
-    ctx.fillStyle = "white";
+    ctx.arc(x, y, ballRadius, 0, Math.PI*2);  
+    ctx.fillStyle = "#FFFFFF";
     ctx.fill();
     ctx.closePath();
 }
 
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drawPaddle();
     drawBall();
+    drawPaddle();
+
+    // bounce the ball off the side walls
+    if(x + dx > canvas.width-ballRadius || x + dx < ballRadius) {
+        dx = -dx;  
+    }
+    // bounce the ball off the top wall
+    if(y + dy < ballRadius) {
+        dy = -dy;  
+    }
+    else if(y + dy > canvas.height-ballRadius) {
+      
+        if(x > paddleX && x < paddleX + paddleWidth) {
+            // detect paddle collision to bounce the ball back up
+            dy = -dy;  
+
+            // Increment the score when the ball hits the paddle.
+            score++;
+
+            // Update the score display in the DOM each frame.
+            scoreDom.innerHTML = 'Score: ' + score;
+        }
+        else {
+            // reset ball to center if it hits the bottom
+            x = canvas.width / 2;
+            y = canvas.height / 2;
+
+            // Reset the ball to the center (with random x-direction) when it misses the paddle (hits bottom), without resetting the score.
+            dx = (Math.random() * 2 - 1) * 2;            
+        }
+    }
+
     x += dx;
     y += dy;
 
-    // ai paddle motion
-    if (x < aiPaddleX) {
-        aiPaddleX -= 4;
-    }
-    if (x > aiPaddleX + paddleWidth) {
-        aiPaddleX += 4;
-    }
-
-    if (y + dy < ballRadius) {
-        if (x > aiPaddleX && x < aiPaddleX + paddleWidth) {
-            dy = -dy;
-        } else {
-            x = canvas.width / 2;
-            y = canvas.height - 30;
-            dx = dx > 0 ? 2 : -2;  // reset ball x-direction
-        }
-    } else if (y + dy > canvas.height - ballRadius) {
-        if (x > playerPaddleX && x < playerPaddleX + paddleWidth) {
-            dy = -dy;
-            score++;
-            scoreDisplay.innerHTML = "Score: " + score;
-        } else {
-            x = canvas.width / 2;
-            y = canvas.height - 30;
-            dx = dx > 0 ? 2 : -2;  // reset ball x-direction
-        }
-    }
-
-    if (x + dx > canvas.width - ballRadius || x + dx < ballRadius) {
-        dx = -dx;
-    }
-
-    if (rightPressed && playerPaddleX < canvas.width - paddleWidth) {
-        playerPaddleX += 7;
-    } else if (leftPressed && playerPaddleX > 0) {
-        playerPaddleX -= 7;
-    }
-    requestAnimationFrame(draw);
+    // Use requestAnimationFrame for smooth animation
+    requestAnimationFrame(draw);  
 }
 
 draw();

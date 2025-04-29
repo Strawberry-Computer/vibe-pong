@@ -1,3 +1,4 @@
+/* PROMPT: CSS: Center the canvas on the page with a black background and white border */
 body {
     margin: 0;
     background-color: black;
@@ -7,6 +8,6 @@ body {
     height: 100vh;
 }
 
-#pongCanvas {
+canvas {
     border: 2px solid white;
 }

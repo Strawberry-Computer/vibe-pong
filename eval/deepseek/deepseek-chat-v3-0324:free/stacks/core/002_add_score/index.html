@@ -1,14 +1,16 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pong Demo</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Pong Game</title>
+    <style>
+        canvas { background: #000; display: block; margin: 0 auto; }
+        #score { color: white; font-size: 24px; text-align: center; margin-bottom: 10px; }
+    </style>
 </head>
 <body>
+    <!-- PROMPT: Add a <div id="score">Score: 0</div> above the canvas to display the score -->
     <div id="score">Score: 0</div>
-    <canvas id="pongCanvas" width="800" height="400"></canvas>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
     <script src="game.js"></script>
 </body>
 </html>
