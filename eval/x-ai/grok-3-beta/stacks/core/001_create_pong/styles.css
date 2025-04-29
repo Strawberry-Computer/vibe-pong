@@ -1,0 +1,13 @@
+body {
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: black;
+    /* PROMPT: Center the canvas on the page with a black background */
+}
+#pongCanvas {
+    border: 2px solid white;
+    /* PROMPT: White border for the canvas */
+}
