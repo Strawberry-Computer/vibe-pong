@@ -3,19 +3,30 @@
 # Create evaluation directory
 mkdir -p eval
 
-# List of models to evaluate
-# Using common OpenRouter and OpenAI compatible models
-MODELS=(
-    "openai/gpt-4"
-    "openai/gpt-4.1"
-    "openai/gpt-4o-mini"
-    "anthropic/claude-3.5-sonnet"
-    "anthropic/claude-3.7-sonnet"
-    "google/gemini-2.0-flash-001"
-    "google/gemini-2.5-pro-exp-03-25:free"
-    "deepseek/deepseek-chat-v3-0324:free"
-    "deepseek/deepseek-r1:free"
-)
+# Get models from environment variable or command line argument
+# Priority: 1. Command line argument 2. Environment variable 3. Default list
+if [ $# -gt 0 ]; then
+    # If arguments provided, use them as models (space-separated)
+    IFS=' ' read -r -a MODELS <<< "$@"
+elif [ ! -z "${EVAL_MODELS}" ]; then
+    # If EVAL_MODELS environment variable is set, use it
+    IFS=' ' read -r -a MODELS <<< "${EVAL_MODELS}"
+else
+    # Default list of models
+    MODELS=(
+        "openai/gpt-4"
+        "openai/gpt-4.1"
+        "openai/gpt-4o-mini"
+        "anthropic/claude-3.5-sonnet"
+        "anthropic/claude-3.7-sonnet"
+        "google/gemini-2.0-flash-001"
+        "google/gemini-2.5-pro-exp-03-25:free"
+        "deepseek/deepseek-chat-v3-0324:free"
+        "deepseek/deepseek-r1:free"
+        "qwen/qwen3-30b-a3b:free"
+        "qwen/qwen3-235b-a22b:free"
+    )
+fi
 
 # Function to run evaluation for a model
 evaluate_model() {
