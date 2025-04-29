@@ -25,6 +25,7 @@ else
         "deepseek/deepseek-r1:free"
         "qwen/qwen3-30b-a3b:free"
         "qwen/qwen3-235b-a22b:free"
+        "x-ai/grok-3-beta"
     )
 fi
 
