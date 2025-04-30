@@ -14,7 +14,6 @@ elif [ ! -z "${EVAL_MODELS}" ]; then
 else
     # Default list of models
     MODELS=(
-        "openai/gpt-4"
         "openai/gpt-4.1"
         "openai/gpt-4o-mini"
         "anthropic/claude-3.5-sonnet"
