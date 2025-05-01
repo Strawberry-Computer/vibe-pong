@@ -23,6 +23,7 @@ else
         "google/gemini-2.5-pro-preview-03-25"
         "deepseek/deepseek-chat-v3-0324:free"
         "deepseek/deepseek-r1:free"
+        "inception/mercury-coder-small-beta"
         "qwen/qwen3-30b-a3b:free"
         "qwen/qwen3-235b-a22b"
         "x-ai/grok-3-beta"
