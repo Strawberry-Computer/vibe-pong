@@ -1,12 +1,13 @@
-// PROMPT: Draw a white paddle (100px wide, 10px high) at the bottom, movable left/right with arrow keys
+// PROMPT: Draw a white paddle (10px wide, 100px high) at the left side of the canvas, movable up/down with arrow keys
 const canvas = document.getElementById('pongCanvas');
 const ctx = canvas.getContext('2d');
 
 const paddle = {
-    width: 100,
-    height: 10,
-    x: canvas.width / 2 - 50,
-    y: canvas.height - 20
+    x: 20,
+    y: canvas.height / 2 - 50,
+    width: 10,
+    height: 100,
+    speed: 5
 };
 
 // PROMPT: Draw a white ball (10px radius) starting at canvas center, moving diagonally with constant speed
@@ -18,43 +19,40 @@ const ball = {
     dy: -4
 };
 
-// PROMPT: movable left/right with arrow keys
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowLeft' && paddle.x > 0) {
-        paddle.x -= 20;
+// PROMPT: movable up/down with arrow keys
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowUp' && paddle.y > 0) {
+        paddle.y -= paddle.speed;
     }
-    if (e.key === 'ArrowRight' && paddle.x < canvas.width - paddle.width) {
-        paddle.x += 20;
+    if (e.key === 'ArrowDown' && paddle.y < canvas.height - paddle.height) {
+        paddle.y += paddle.speed;
     }
 });
 
-function resetBall() {
-    ball.x = canvas.width / 2;
-    ball.y = canvas.height / 2;
-    ball.dx = 4;
-    ball.dy = -4;
-}
-
-function detectCollisions() {
+function update() {
     // PROMPT: Bounce the ball off the top and side walls
-    if (ball.x + ball.radius > canvas.width || ball.x - ball.radius < 0) {
-        ball.dx = -ball.dx;
+    if (ball.y + ball.radius > canvas.height || ball.y - ball.radius < 0) {
+        ball.dy *= -1;
     }
-    if (ball.y - ball.radius < 0) {
-        ball.dy = -ball.dy;
-    }
-
-    // PROMPT: reset to center if it hits the bottom (misses paddle)
-    if (ball.y + ball.radius > canvas.height) {
-        resetBall();
+    if (ball.x + ball.radius > canvas.width) {
+        ball.dx *= -1;
     }
 
     // PROMPT: Detect paddle collision to bounce the ball back up
-    if (ball.y + ball.radius > paddle.y && 
-        ball.x > paddle.x && 
-        ball.x < paddle.x + paddle.width) {
-        ball.dy = -ball.dy;
+    if (ball.x - ball.radius < paddle.x + paddle.width &&
+        ball.y > paddle.y &&
+        ball.y < paddle.y + paddle.height) {
+        ball.dx *= -1;
     }
+
+    // PROMPT: reset to center if it hits the bottom (misses paddle)
+    if (ball.x - ball.radius < 0) {
+        ball.x = canvas.width / 2;
+        ball.y = canvas.height / 2;
+    }
+
+    ball.x += ball.dx;
+    ball.y += ball.dy;
 }
 
 function draw() {
@@ -65,17 +63,14 @@ function draw() {
     
     ctx.beginPath();
     ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
-    ctx.fillStyle = 'white';
     ctx.fill();
-    ctx.closePath();
-
-    ball.x += ball.dx;
-    ball.y += ball.dy;
-
-    detectCollisions();
-
-    // PROMPT: Use requestAnimationFrame for smooth animation
-    requestAnimationFrame(draw);
 }
 
-draw();
+// PROMPT: Use requestAnimationFrame for smooth animation
+function gameLoop() {
+    update();
+    draw();
+    requestAnimationFrame(gameLoop);
+}
+
+gameLoop();

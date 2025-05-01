@@ -1,104 +1,70 @@
+// PROMPT: canvas setup and game elements
 const canvas = document.getElementById('pongCanvas');
 const ctx = canvas.getContext('2d');
 
-// Game elements
-const paddleWidth = 100;
-const paddleHeight = 10;
-const ballRadius = 10;
+// PROMPT: white paddle (10px wide, 100px high) at left side
+const paddleWidth = 10;
+const paddleHeight = 100;
+let paddleY = canvas.height / 2 - paddleHeight / 2;
 
-let paddleX = (canvas.width - paddleWidth) / 2;
+// PROMPT: white ball (10px radius) starting at center
+const ballRadius = 10;
 let ballX = canvas.width / 2;
 let ballY = canvas.height / 2;
-let ballSpeedX = 4;
-let ballSpeedY = 4;
+let ballSpeedX = 5;
+let ballSpeedY = 5;
 
-// Key states
-let rightPressed = false;
-let leftPressed = false;
+// PROMPT: Draw elements
+function draw() {
+    // Clear canvas
+    ctx.fillStyle = 'black';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-// Event listeners
-document.addEventListener('keydown', keyDownHandler);
-document.addEventListener('keyup', keyUpHandler);
-
-function keyDownHandler(e) {
-    if (e.key === 'Right' || e.key === 'ArrowRight') {
-        rightPressed = true;
-    } else if (e.key === 'Left' || e.key === 'ArrowLeft') {
-        leftPressed = true;
-    }
-}
-
-function keyUpHandler(e) {
-    if (e.key === 'Right' || e.key === 'ArrowRight') {
-        rightPressed = false;
-    } else if (e.key === 'Left' || e.key === 'ArrowLeft') {
-        leftPressed = false;
-    }
-}
-
-function drawPaddle() {
-    ctx.beginPath();
-    ctx.rect(paddleX, canvas.height - paddleHeight, paddleWidth, paddleHeight);
+    // Draw paddle
     ctx.fillStyle = 'white';
-    ctx.fill();
-    ctx.closePath();
-}
+    ctx.fillRect(0, paddleY, paddleWidth, paddleHeight);
 
-function drawBall() {
+    // Draw ball
     ctx.beginPath();
     ctx.arc(ballX, ballY, ballRadius, 0, Math.PI * 2);
-    ctx.fillStyle = 'white';
     ctx.fill();
-    ctx.closePath();
-}
 
-function update() {
-    // Clear canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-    // Draw elements
-    drawPaddle();
-    drawBall();
-    
-    // Move paddle
-    if (rightPressed && paddleX < canvas.width - paddleWidth) {
-        paddleX += 7;
-    } else if (leftPressed && paddleX > 0) {
-        paddleX -= 7;
+    // PROMPT: Detect paddle collision
+    if (ballX - ballRadius <= paddleWidth && 
+        ballY >= paddleY && ballY <= paddleY + paddleHeight) {
+        ballSpeedX = -ballSpeedX;
     }
-    
+
+    // PROMPT: Bounce off walls
+    if (ballY - ballRadius <= 0 || ballY + ballRadius >= canvas.height) {
+        ballSpeedY = -ballSpeedY;
+    }
+
+    // Reset if missed paddle
+    if (ballX + ballRadius >= canvas.width) {
+        ballX = canvas.width / 2;
+        ballY = canvas.height / 2;
+    }
+
     // Move ball
     ballX += ballSpeedX;
     ballY += ballSpeedY;
-    
-    // Wall collision (top, left, right)
-    if (ballY - ballRadius < 0) {
-        ballSpeedY = -ballSpeedY;
-    }
-    if (ballX - ballRadius < 0 || ballX + ballRadius > canvas.width) {
-        ballSpeedX = -ballSpeedX;
-    }
-    
-    // Paddle collision
-    if (
-        ballY + ballRadius > canvas.height - paddleHeight &&
-        ballX > paddleX &&
-        ballX < paddleX + paddleWidth
-    ) {
-        ballSpeedY = -ballSpeedY;
-    }
-    
-    // Bottom wall (miss)
-    if (ballY + ballRadius > canvas.height) {
-        // Reset ball
-        ballX = canvas.width / 2;
-        ballY = canvas.height / 2;
-        ballSpeedX = 4;
-        ballSpeedY = 4;
-    }
-    
-    requestAnimationFrame(update);
 }
 
-// Start the game
-update();
+// PROMPT: Use requestAnimationFrame for smooth animation
+function gameLoop() {
+    draw();
+    requestAnimationFrame(gameLoop);
+}
+
+// PROMPT: movable up/down with arrow keys
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowUp' && paddleY > 0) {
+        paddleY -= 20;
+    } else if (e.key === 'ArrowDown' && paddleY < canvas.height - paddleHeight) {
+        paddleY += 20;
+    }
+});
+
+// Start game
+gameLoop();

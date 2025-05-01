@@ -1,7 +1,6 @@
-/* PROMPT: CSS: Center the canvas on the page with a black background and white border */
 body {
     margin: 0;
-    background-color: black;
+    background: black;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -9,5 +8,6 @@ body {
 }
 
 canvas {
-    border: 2px solid white;
+    border: 1px solid white;
+    background: black;
 }

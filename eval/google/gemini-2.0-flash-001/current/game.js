@@ -1,142 +1,145 @@
-// PROMPT: JS: Use Canvas API to...
 const canvas = document.getElementById('pongCanvas');
 const ctx = canvas.getContext('2d');
 
-let paddleX = canvas.width / 2 - 50; // Paddle starts at the horizontal center
-const paddleY = canvas.height - 20;
-const paddleWidth = 100;
-const paddleHeight = 10;
-const paddleSpeed = 7;
-let leftPressed = false;
-let rightPressed = false;
-
+// Ball properties
 let ballX = canvas.width / 2;
 let ballY = canvas.height / 2;
-const ballRadius = 10;
-let ballSpeedX = 2;
-let ballSpeedY = 2;
+let ballSpeedX = 5;
+let ballSpeedY = 5;
+const ballSize = 10;
 
-// PROMPT: JS:   - Initialize a score variable starting at 0.
-let score = 0;
-// PROMPT: Detect paddle collision to bounce the ball back up.
-function collisionDetection() {
-    if (ballX + ballRadius > paddleX && ballX - ballRadius < paddleX + paddleWidth && ballY + ballRadius > paddleY) {
-        ballSpeedY = -ballSpeedY;
-        // PROMPT: JS:   - Increment the score when the ball hits the paddle.
-        score++;
-        // PROMPT: JS:   - Update the score display in the DOM each frame.
-        document.getElementById('score').innerText = 'Score: ' + score;
-    }
-}
+// Paddle properties
+const paddleWidth = 10;
+const paddleHeight = 100;
+let playerPaddleY = canvas.height / 2 - paddleHeight / 2;
+let opponentPaddleY = canvas.height / 2 - paddleHeight / 2;
+const paddleSpeed = 7;
 
-function drawPaddle() {
-    ctx.beginPath();
-    ctx.rect(paddleX, paddleY, paddleWidth, paddleHeight);
-    ctx.fillStyle = "white";
-    ctx.fill();
-    ctx.closePath();
-}
+// Scores
+let playerScore = 0;
+let opponentScore = 0;
 
-function drawBall() {
-    ctx.beginPath();
-    ctx.arc(ballX, ballY, ballRadius, 0, Math.PI * 2);
-    ctx.fillStyle = "white";
-    ctx.fill();
-    ctx.closePath();
-}
+// Input
+let upPressed = false;
+let downPressed = false;
 
-// PROMPT: Add AI Player to Pong
-// AI Paddle properties
-let aiPaddleX = canvas.width / 2 - 50;
-const aiPaddleY = 20; // Position at the top
-const aiPaddleWidth = 100;
-const aiPaddleHeight = 10;
-const aiPaddleSpeed = 3; // Slower speed for AI
-
-function drawAiPaddle() {
-    ctx.beginPath();
-    ctx.rect(aiPaddleX, aiPaddleY, aiPaddleWidth, aiPaddleHeight);
-    ctx.fillStyle = "white";
-    ctx.fill();
-    ctx.closePath();
-}
-
-function aiMove() {
-    const paddleCenter = aiPaddleX + aiPaddleWidth / 2;
-    if (ballX > paddleCenter && aiPaddleX < canvas.width - aiPaddleWidth) {
-        aiPaddleX += aiPaddleSpeed;
-    } else if (ballX < paddleCenter && aiPaddleX > 0) {
-        aiPaddleX -= aiPaddleSpeed;
-    }
-}
-
-function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas
-
-    drawPaddle();
-    drawBall();
-    collisionDetection();
-    drawAiPaddle(); // Draw AI paddle
-    aiMove(); // Move AI paddle
-
-    // Ball Movement
-    ballX += ballSpeedX;
-    ballY += ballSpeedY;
-  
-    // PROMPT: Bounce the ball off the top and side walls; reset to center if it hits the bottom (misses paddle).
-    // Bounce off top/bottom
-    if (ballY + ballRadius > canvas.height) {
-        // PROMPT: JS:   - Reset the ball to the center (with random x-direction) when it misses the paddle (hits bottom), without resetting the score.
-        // Reset position
-        ballX = canvas.width / 2;
-        ballY = canvas.height / 2;
-        ballSpeedX = (Math.random() > 0.5 ? 2 : -2);
-    }
-    if (ballY - ballRadius < 0) {
-        ballSpeedY = -ballSpeedY;
-    }
-
-    // Bounce off left/right
-    if (ballX + ballRadius > canvas.width || ballX - ballRadius < 0) {
-        ballSpeedX = -ballSpeedX;
-    }
-
-    // Paddle Movement
-    if (rightPressed && paddleX < canvas.width - paddleWidth) {
-        paddleX += paddleSpeed;
-    } else if (leftPressed && paddleX > 0) {
-        paddleX -= paddleSpeed;
-    }
-    // PROMPT: JS:   - Update the score display in the DOM each frame.
-    document.getElementById('score').innerText = 'Score: ' + score;
-
-    // PROMPT: Use requestAnimationFrame for smooth animation.
-    requestAnimationFrame(draw);
-}
-
-
-document.addEventListener("keydown", keyDownHandler, false);
-document.addEventListener("keyup", keyUpHandler, false);
+// Event listeners for input
+document.addEventListener('keydown', keyDownHandler, false);
+document.addEventListener('keyup', keyUpHandler, false);
 
 function keyDownHandler(e) {
-    if (e.key == "Right" || e.key == "ArrowRight") {
-        rightPressed = true;
+    if (e.key == "Up" || e.key == "ArrowUp") {
+        upPressed = true;
     }
-    else if (e.key == "Left" || e.key == "ArrowLeft") {
-        leftPressed = true;
+    else if (e.key == "Down" || e.key == "ArrowDown") {
+        downPressed = true;
     }
 }
 
 function keyUpHandler(e) {
-    if (e.key == "Right" || e.key == "ArrowRight") {
-        rightPressed = false;
+    if (e.key == "Up" || e.key == "ArrowUp") {
+        upPressed = false;
     }
-    else if (e.key == "Left" || e.key == "ArrowLeft") {
-        leftPressed = false;
+    else if (e.key == "Down" || e.key == "ArrowDown") {
+        downPressed = false;
     }
 }
 
+// Update game logic
+function update() {
+    // Move paddles
+    if (upPressed) {
+        playerPaddleY -= paddleSpeed;
+        if (playerPaddleY < 0) {
+            playerPaddleY = 0;
+        }
+    }
+    else if (downPressed) {
+        playerPaddleY += paddleSpeed;
+        if (playerPaddleY + paddleHeight > canvas.height) {
+            playerPaddleY = canvas.height - paddleHeight;
+        }
+    }
 
-// PROMPT: Draw a white paddle (100px wide, 10px high) at the bottom, movable left/right with arrow keys.
-// PROMPT: Draw a white ball (10px radius) starting at canvas center, moving diagonally with constant speed.
-draw();
+    // PROMPT: Add AI Player to Pong
+    // Basic opponent AI
+    if (ballY < opponentPaddleY + paddleHeight / 2) {
+        opponentPaddleY -= paddleSpeed;
+        if (opponentPaddleY < 0) {
+            opponentPaddleY = 0;
+        }
+    } else if (ballY > opponentPaddleY + paddleHeight / 2) {
+        opponentPaddleY += paddleSpeed;
+        if (opponentPaddleY + paddleHeight > canvas.height) {
+            opponentPaddleY = canvas.height - paddleHeight;
+        }
+    }
+
+    // Move ball
+    ballX += ballSpeedX;
+    ballY += ballSpeedY;
+
+    // Ball collision with top and bottom walls
+    if (ballY + ballSize > canvas.height || ballY - ballSize < 0) {
+        ballSpeedY = -ballSpeedY;
+    }
+
+    // Ball collision with paddles
+    if (ballX - ballSize < paddleWidth && ballY > playerPaddleY && ballY < playerPaddleY + paddleHeight) {
+        ballSpeedX = -ballSpeedX;
+    }
+    if (ballX + ballSize > canvas.width - paddleWidth && ballY > opponentPaddleY && ballY < opponentPaddleY + paddleHeight) {
+        ballSpeedX = -ballSpeedX;
+    }
+
+    // Ball out of bounds
+    if (ballX < 0) {
+        opponentScore++;
+        resetBall();
+    } else if (ballX > canvas.width) {
+        playerScore++;
+        resetBall();
+    }
+}
+
+// Reset ball position and direction
+function resetBall() {
+    ballX = canvas.width / 2;
+    ballY = canvas.height / 2;
+    ballSpeedX = -ballSpeedX;
+    ballSpeedY = 5;
+}
+
+// Draw everything
+function draw() {
+    // Clear canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Draw ball
+    ctx.fillStyle = 'white';
+    ctx.beginPath();
+    ctx.arc(ballX, ballY, ballSize, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Draw paddles
+    ctx.fillRect(0, playerPaddleY, paddleWidth, paddleHeight);
+    ctx.fillRect(canvas.width - paddleWidth, opponentPaddleY, paddleWidth, paddleHeight);
+
+    // PROMPT: Add AI Player to Pong
+    // PROMPT: Add Scoring to Pong
+    // Draw scores
+    ctx.font = '20px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('Player: ' + playerScore, canvas.width / 4, 30);
+    ctx.fillText('Opponent: ' + opponentScore, canvas.width * 3 / 4, 30);
+}
+
+// Game loop
+function gameLoop() {
+    update();
+    draw();
+    requestAnimationFrame(gameLoop);
+}
+
+// Start the game
+gameLoop();

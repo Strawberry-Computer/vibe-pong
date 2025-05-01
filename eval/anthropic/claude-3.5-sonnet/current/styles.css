@@ -1,13 +1,14 @@
-/* PROMPT: Center the canvas on the page with a black background and white border */
+/* PROMPT: Generate a simple Pong game using HTML, CSS, and JavaScript */
 body {
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
     margin: 0;
-    background-color: #000;
+    background: #000;
 }
 
+/* PROMPT: Use `<canvas width="800" height="400" id="pongCanvas">` */
 canvas {
     border: 2px solid white;
 }

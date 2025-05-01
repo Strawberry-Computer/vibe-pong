@@ -1,13 +1,16 @@
+canvas {
+    /* PROMPT: Use <canvas width="800" height="400" id="pongCanvas"> */
+    border: 1px solid white;
+    background-color: black;
+    display: block;
+    margin: 0 auto;
+}
 body {
-    margin: 0;
+    /* PROMPT: Use <canvas width="800" height="400" id="pongCanvas"> */
+    background-color: #333;
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
-    background-color: black;
-    /* PROMPT: Center the canvas on the page with a black background */
-}
-#pongCanvas {
-    border: 2px solid white;
-    /* PROMPT: White border for the canvas */
+    margin: 0;
 }

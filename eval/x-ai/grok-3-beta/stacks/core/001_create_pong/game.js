@@ -1,96 +1,104 @@
 const canvas = document.getElementById('pongCanvas');
 const ctx = canvas.getContext('2d');
-// PROMPT: Use Canvas API to draw elements
 
-const paddleWidth = 100;
-const paddleHeight = 10;
-const paddleX = (canvas.width - paddleWidth) / 2;
-let paddleSpeed = 7;
-let paddleDirection = 0;
-// PROMPT: Draw a white paddle (100px wide, 10px high) at the bottom, movable left/right
+// PROMPT: Draw a white paddle (10px wide, 100px high) at the left side of the canvas
+const paddle = {
+    x: 10,
+    y: canvas.height / 2 - 50,
+    width: 10,
+    height: 100,
+    speed: 5
+};
 
-const ballRadius = 10;
-let ballX = canvas.width / 2;
-let ballY = canvas.height / 2;
-let ballSpeedX = 5;
-let ballSpeedY = -5;
-// PROMPT: Draw a white ball (10px radius) starting at canvas center, moving diagonally with constant speed
+// PROMPT: Draw a white ball (10px radius) starting at canvas center
+const ball = {
+    x: canvas.width / 2,
+    y: canvas.height / 2,
+    radius: 10,
+    speedX: 5,
+    speedY: 5
+};
 
-function drawPaddle() {
-    ctx.fillStyle = 'white';
-    ctx.fillRect(paddleX, canvas.height - paddleHeight, paddleWidth, paddleHeight);
-    // PROMPT: Draw a white paddle at the bottom
+// PROMPT: movable up/down with arrow keys
+const keys = {
+    ArrowUp: false,
+    ArrowDown: false
+};
+
+document.addEventListener('keydown', (e) => {
+    // PROMPT: movable up/down with arrow keys
+    if (e.key in keys) {
+        keys[e.key] = true;
+    }
+});
+
+document.addEventListener('keyup', (e) => {
+    // PROMPT: movable up/down with arrow keys
+    if (e.key in keys) {
+        keys[e.key] = false;
+    }
+});
+
+function movePaddle() {
+    // PROMPT: movable up/down with arrow keys
+    if (keys.ArrowUp && paddle.y > 0) {
+        paddle.y -= paddle.speed;
+    }
+    if (keys.ArrowDown && paddle.y < canvas.height - paddle.height) {
+        paddle.y += paddle.speed;
+    }
 }
 
-function drawBall() {
-    ctx.beginPath();
-    ctx.arc(ballX, ballY, ballRadius, 0, Math.PI * 2);
-    ctx.fillStyle = 'white';
-    ctx.fill();
-    ctx.closePath();
-    // PROMPT: Draw a white ball
-}
+function moveBall() {
+    // PROMPT: moving diagonally with constant speed
+    ball.x += ball.speedX;
+    ball.y += ball.speedY;
 
-function updatePaddle() {
-    if (paddleDirection === -1 && paddleX > 0) {
-        paddleX -= paddleSpeed;
+    // PROMPT: Bounce the ball off the top and side walls
+    if (ball.y + ball.radius > canvas.height || ball.y - ball.radius < 0) {
+        ball.speedY = -ball.speedY;
     }
-    if (paddleDirection === 1 && paddleX < canvas.width - paddleWidth) {
-        paddleX += paddleSpeed;
+    if (ball.x + ball.radius > canvas.width) {
+        ball.speedX = -ball.speedX;
     }
-    // PROMPT: Movable left/right with arrow keys
-}
 
-function updateBall() {
-    ballX += ballSpeedX;
-    ballY += ballSpeedY;
-    // PROMPT: Ball moving diagonally with constant speed
+    // PROMPT: reset to center if it hits the bottom (misses paddle)
+    if (ball.x - ball.radius < 0) {
+        ball.x = canvas.width / 2;
+        ball.y = canvas.height / 2;
+    }
 
-    if (ballX + ballRadius > canvas.width || ballX - ballRadius < 0) {
-        ballSpeedX = -ballSpeedX;
-    }
-    if (ballY - ballRadius < 0) {
-        ballSpeedY = -ballSpeedY;
-    }
-    if (ballY + ballRadius > canvas.height) {
-        ballX = canvas.width / 2;
-        ballY = canvas.height / 2;
-        ballSpeedY = -5;
-    }
-    // PROMPT: Bounce the ball off the top and side walls; reset to center if it hits the bottom
-
-    if (ballY + ballRadius > canvas.height - paddleHeight && 
-        ballX > paddleX && ballX < paddleX + paddleWidth) {
-        ballSpeedY = -ballSpeedY;
-    }
     // PROMPT: Detect paddle collision to bounce the ball back up
+    if (ball.x - ball.radius < paddle.x + paddle.width &&
+        ball.y > paddle.y && 
+        ball.y < paddle.y + paddle.height) {
+        ball.speedX = -ball.speedX;
+    }
 }
 
 function draw() {
+    // PROMPT: Use <canvas width="800" height="400" id="pongCanvas">
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drawPaddle();
-    drawBall();
-    updatePaddle();
-    updateBall();
-    requestAnimationFrame(draw);
-    // PROMPT: Use requestAnimationFrame for smooth animation
+
+    // PROMPT: Draw a white paddle (10px wide, 100px high)
+    ctx.fillStyle = 'white';
+    ctx.fillRect(paddle.x, paddle.y, paddle.width, paddle.height);
+
+    // PROMPT: Draw a white ball (10px radius)
+    ctx.beginPath();
+    ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+    ctx.fillStyle = 'white';
+    ctx.fill();
+    ctx.closePath();
 }
 
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowLeft') {
-        paddleDirection = -1;
-    } else if (e.key === 'ArrowRight') {
-        paddleDirection = 1;
-    }
-});
-// PROMPT: Movable left/right with arrow keys
+function gameLoop() {
+    // PROMPT: Use requestAnimationFrame for smooth animation
+    movePaddle();
+    moveBall();
+    draw();
+    requestAnimationFrame(gameLoop);
+}
 
-document.addEventListener('keyup', (e) => {
-    if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
-        paddleDirection = 0;
-    }
-});
-// PROMPT: Movable left/right with arrow keys
-
-draw();
-// PROMPT: Start the animation loop
+// PROMPT: Use requestAnimationFrame for smooth animation
+gameLoop();

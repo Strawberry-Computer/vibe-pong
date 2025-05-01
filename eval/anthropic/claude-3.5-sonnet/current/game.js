@@ -1,19 +1,21 @@
 const canvas = document.getElementById('pongCanvas');
 const ctx = canvas.getContext('2d');
 
-// PROMPT: Enhance the Pong game by having the computer player move the paddle automatically
-const aiPaddle = {
-    width: 100,
-    height: 10,
-    x: canvas.width / 2 - 50,
-    y: 20
+const paddle = {
+    x: 20,
+    y: canvas.height / 2 - 50,
+    width: 10,
+    height: 100,
+    speed: 5
 };
 
-const playerPaddle = {
-    width: 100,
-    height: 10,
-    x: canvas.width / 2 - 50,
-    y: canvas.height - 20
+// PROMPT: Add the computer player which moves the paddle automatically
+const computerPaddle = {
+    x: canvas.width - 30,
+    y: canvas.height / 2 - 50,
+    width: 10,
+    height: 100,
+    speed: 5
 };
 
 const ball = {
@@ -24,88 +26,91 @@ const ball = {
     dy: -4
 };
 
-let score = 0;
+const score = {
+    player: 0,
+    computer: 0
+};
 
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowLeft' && playerPaddle.x > 0) {
-        playerPaddle.x -= 20;
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowUp' && paddle.y > 0) {
+        paddle.y -= paddle.speed;
     }
-    if (e.key === 'ArrowRight' && playerPaddle.x < canvas.width - playerPaddle.width) {
-        playerPaddle.x += 20;
+    if (e.key === 'ArrowDown' && paddle.y < canvas.height - paddle.height) {
+        paddle.y += paddle.speed;
     }
 });
 
-function resetBall() {
-    ball.x = canvas.width / 2;
-    ball.y = canvas.height / 2;
-    ball.dx = 4 * (Math.random() > 0.5 ? 1 : -1);
-    ball.dy = -4;
-}
+function update() {
+    // PROMPT: Add the computer player which moves the paddle automatically
+    if (ball.y > computerPaddle.y + computerPaddle.height/2) {
+        computerPaddle.y += computerPaddle.speed;
+    }
+    if (ball.y < computerPaddle.y + computerPaddle.height/2) {
+        computerPaddle.y -= computerPaddle.speed;
+    }
 
-function updateScore() {
-    document.getElementById('score').textContent = `Score: ${score}`;
-}
-
-// PROMPT: Make the computer player move the paddle automatically
-function updateAIPaddle() {
-    const paddleCenter = aiPaddle.x + aiPaddle.width / 2;
-    const ballCenter = ball.x;
-    const moveSpeed = 5;
+    if (ball.y + ball.radius > canvas.height || ball.y - ball.radius < 0) {
+        ball.dy *= -1;
+    }
     
-    if (paddleCenter < ballCenter && aiPaddle.x < canvas.width - aiPaddle.width) {
-        aiPaddle.x += moveSpeed;
-    }
-    if (paddleCenter > ballCenter && aiPaddle.x > 0) {
-        aiPaddle.x -= moveSpeed;
-    }
-}
-
-function detectCollisions() {
-    if (ball.x + ball.radius > canvas.width || ball.x - ball.radius < 0) {
-        ball.dx = -ball.dx;
+    // PROMPT: Make it clear there are 2 paddles: one for the user and one for the computer
+    if (ball.x + ball.radius > computerPaddle.x &&
+        ball.y > computerPaddle.y &&
+        ball.y < computerPaddle.y + computerPaddle.height) {
+        ball.dx *= -1;
     }
 
-    // PROMPT: Add collision detection for AI paddle
-    if (ball.y - ball.radius < aiPaddle.y + aiPaddle.height && 
-        ball.x > aiPaddle.x && 
-        ball.x < aiPaddle.x + aiPaddle.width) {
-        ball.dy = -ball.dy;
+    if (ball.x + ball.radius > canvas.width) {
+        score.player += 1;
+        ball.x = canvas.width / 2;
+        ball.y = canvas.height / 2;
     }
 
-    if (ball.y + ball.radius > canvas.height) {
-        resetBall();
+    if (ball.x - ball.radius < paddle.x + paddle.width &&
+        ball.y > paddle.y &&
+        ball.y < paddle.y + paddle.height) {
+        ball.dx *= -1;
     }
 
-    if (ball.y + ball.radius > playerPaddle.y && 
-        ball.x > playerPaddle.x && 
-        ball.x < playerPaddle.x + playerPaddle.width) {
-        ball.dy = -ball.dy;
-        score += 1;
-        updateScore();
+    if (ball.x - ball.radius < 0) {
+        score.computer += 1;
+        ball.x = canvas.width / 2;
+        ball.y = canvas.height / 2;
     }
+
+    ball.x += ball.dx;
+    ball.y += ball.dy;
 }
 
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
+    ctx.font = '48px Arial';
     ctx.fillStyle = 'white';
-    ctx.fillRect(playerPaddle.x, playerPaddle.y, playerPaddle.width, playerPaddle.height);
-    ctx.fillRect(aiPaddle.x, aiPaddle.y, aiPaddle.width, aiPaddle.height);
+    ctx.fillText(score.player, canvas.width/4, 50);
+    ctx.fillText(score.computer, 3*canvas.width/4, 50);
+    
+    ctx.fillRect(paddle.x, paddle.y, paddle.width, paddle.height);
+    
+    // PROMPT: Make it clear there are 2 paddles: one for the user and one for the computer
+    ctx.fillRect(computerPaddle.x, computerPaddle.y, computerPaddle.width, computerPaddle.height);
     
     ctx.beginPath();
     ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
-    ctx.fillStyle = 'white';
     ctx.fill();
-    ctx.closePath();
 
-    updateAIPaddle();
-    
-    ball.x += ball.dx;
-    ball.y += ball.dy;
-
-    detectCollisions();
-
-    requestAnimationFrame(draw);
+    ctx.setLineDash([5, 15]);
+    ctx.beginPath();
+    ctx.moveTo(canvas.width/2, 0);
+    ctx.lineTo(canvas.width/2, canvas.height);
+    ctx.strokeStyle = 'white';
+    ctx.stroke();
 }
 
-draw();
+function gameLoop() {
+    update();
+    draw();
+    requestAnimationFrame(gameLoop);
+}
+
+gameLoop();

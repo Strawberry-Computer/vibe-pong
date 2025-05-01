@@ -1,15 +1,16 @@
-<!-- PROMPT: HTML: Add a <div id="score">Score: 0</div> above the canvas to display the score. -->
+<!-- PROMPT: Generate a simple Pong game using HTML, CSS, and JavaScript -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Pong Demo</title>
+    <title>Pong Game</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Pong Demo</h1>
-    <div id="score">Score: 0</div>
-    <canvas id="pongCanvas" width="800" height="400"></canvas>
+    <!-- PROMPT: Use <canvas width="800" height="400" id="pongCanvas"> -->
+    <canvas width="800" height="400" id="pongCanvas"></canvas>
+    <!-- PROMPT: Enhance the Pong game by adding score display -->
+    <div id="scoreBoard" style="position:absolute; left:50%; top:30px; color:white; font-size:32px; transform:translateX(-50%); font-family:monospace; text-align:center; pointer-events:none;"></div>
     <script src="game.js"></script>
 </body>
 </html>

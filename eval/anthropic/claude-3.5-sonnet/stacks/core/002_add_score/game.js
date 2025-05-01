@@ -2,10 +2,11 @@ const canvas = document.getElementById('pongCanvas');
 const ctx = canvas.getContext('2d');
 
 const paddle = {
-    width: 100,
-    height: 10,
-    x: canvas.width / 2 - 50,
-    y: canvas.height - 20
+    x: 20,
+    y: canvas.height / 2 - 50,
+    width: 10,
+    height: 100,
+    speed: 5
 };
 
 const ball = {
@@ -16,71 +17,76 @@ const ball = {
     dy: -4
 };
 
-// PROMPT: Initialize a score variable starting at 0
-let score = 0;
+// PROMPT: Add score tracking
+const score = {
+    player: 0,
+    computer: 0
+};
 
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowLeft' && paddle.x > 0) {
-        paddle.x -= 20;
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowUp' && paddle.y > 0) {
+        paddle.y -= paddle.speed;
     }
-    if (e.key === 'ArrowRight' && paddle.x < canvas.width - paddle.width) {
-        paddle.x += 20;
+    if (e.key === 'ArrowDown' && paddle.y < canvas.height - paddle.height) {
+        paddle.y += paddle.speed;
     }
 });
 
-// PROMPT: Reset the ball to the center (with random x-direction) when it misses the paddle
-function resetBall() {
-    ball.x = canvas.width / 2;
-    ball.y = canvas.height / 2;
-    ball.dx = 4 * (Math.random() > 0.5 ? 1 : -1);
-    ball.dy = -4;
-}
-
-// PROMPT: Update the score display in the DOM each frame
-function updateScore() {
-    document.getElementById('score').textContent = `Score: ${score}`;
-}
-
-function detectCollisions() {
-    if (ball.x + ball.radius > canvas.width || ball.x - ball.radius < 0) {
-        ball.dx = -ball.dx;
+function update() {
+    if (ball.y + ball.radius > canvas.height || ball.y - ball.radius < 0) {
+        ball.dy *= -1;
     }
-    if (ball.y - ball.radius < 0) {
-        ball.dy = -ball.dy;
+    if (ball.x + ball.radius > canvas.width) {
+        ball.dx *= -1;
+        // PROMPT: Add point when ball hits right wall
+        score.player += 1;
     }
 
-    if (ball.y + ball.radius > canvas.height) {
-        resetBall();
+    if (ball.x - ball.radius < paddle.x + paddle.width &&
+        ball.y > paddle.y &&
+        ball.y < paddle.y + paddle.height) {
+        ball.dx *= -1;
     }
 
-    // PROMPT: Increment the score when the ball hits the paddle
-    if (ball.y + ball.radius > paddle.y && 
-        ball.x > paddle.x && 
-        ball.x < paddle.x + paddle.width) {
-        ball.dy = -ball.dy;
-        score += 1;
-        updateScore();
+    // PROMPT: Add point for computer when ball hits left wall
+    if (ball.x - ball.radius < 0) {
+        score.computer += 1;
+        ball.x = canvas.width / 2;
+        ball.y = canvas.height / 2;
     }
+
+    ball.x += ball.dx;
+    ball.y += ball.dy;
 }
 
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
+    // PROMPT: Draw score display
+    ctx.font = '48px Arial';
     ctx.fillStyle = 'white';
+    ctx.fillText(score.player, canvas.width/4, 50);
+    ctx.fillText(score.computer, 3*canvas.width/4, 50);
+    
     ctx.fillRect(paddle.x, paddle.y, paddle.width, paddle.height);
     
     ctx.beginPath();
     ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
-    ctx.fillStyle = 'white';
     ctx.fill();
-    ctx.closePath();
 
-    ball.x += ball.dx;
-    ball.y += ball.dy;
-
-    detectCollisions();
-
-    requestAnimationFrame(draw);
+    // PROMPT: Draw center line
+    ctx.setLineDash([5, 15]);
+    ctx.beginPath();
+    ctx.moveTo(canvas.width/2, 0);
+    ctx.lineTo(canvas.width/2, canvas.height);
+    ctx.strokeStyle = 'white';
+    ctx.stroke();
 }
 
-draw();
+function gameLoop() {
+    update();
+    draw();
+    requestAnimationFrame(gameLoop);
+}
+
+gameLoop();

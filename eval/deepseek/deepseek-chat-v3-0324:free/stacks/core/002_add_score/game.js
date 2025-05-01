@@ -1,83 +1,70 @@
-const canvas = document.getElementById('gameCanvas');
+const canvas = document.getElementById('pongCanvas');
 const ctx = canvas.getContext('2d');
-const scoreDisplay = document.getElementById('score');
+const scoreDisplay = document.getElementById('scoreDisplay');
 
-// PROMPT: Initialize a score variable starting at 0
-let score = 0;
+// PROMPT: Add scoring system
+let playerScore = 0;
+let computerScore = 0;
 
-const ball = {
-    x: canvas.width / 2,
-    y: canvas.height / 2,
-    radius: 10,
-    dx: 4 * (Math.random() > 0.5 ? 1 : -1),
-    dy: 4
-};
+const paddleWidth = 10;
+const paddleHeight = 100;
+let paddleY = canvas.height / 2 - paddleHeight / 2;
 
-const paddle = {
-    width: 100,
-    height: 15,
-    x: canvas.width / 2 - 50
-};
+const ballRadius = 10;
+let ballX = canvas.width / 2;
+let ballY = canvas.height / 2;
+let ballSpeedX = 5;
+let ballSpeedY = 5;
 
-function drawBall() {
+function draw() {
+    ctx.fillStyle = 'black';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Draw paddle
+    ctx.fillStyle = 'white';
+    ctx.fillRect(0, paddleY, paddleWidth, paddleHeight);
+
+    // Draw ball
     ctx.beginPath();
-    ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
-    ctx.fillStyle = '#fff';
+    ctx.arc(ballX, ballY, ballRadius, 0, Math.PI * 2);
     ctx.fill();
-    ctx.closePath();
+
+    // PROMPT: Update score display
+    scoreDisplay.textContent = `Player: ${playerScore} | Computer: ${computerScore}`;
+
+    if (ballX - ballRadius <= paddleWidth && 
+        ballY >= paddleY && ballY <= paddleY + paddleHeight) {
+        ballSpeedX = -ballSpeedX;
+        // PROMPT: Increment player score when hitting the ball
+        playerScore++;
+    }
+
+    if (ballY - ballRadius <= 0 || ballY + ballRadius >= canvas.height) {
+        ballSpeedY = -ballSpeedY;
+    }
+
+    if (ballX + ballRadius >= canvas.width) {
+        ballX = canvas.width / 2;
+        ballY = canvas.height / 2;
+        // PROMPT: Increment computer score when missing the ball
+        computerScore++;
+    }
+
+    ballX += ballSpeedX;
+    ballY += ballSpeedY;
 }
 
-function drawPaddle() {
-    ctx.fillStyle = '#fff';
-    ctx.fillRect(paddle.x, canvas.height - paddle.height, paddle.width, paddle.height);
+function gameLoop() {
+    draw();
+    requestAnimationFrame(gameLoop);
 }
 
-function update() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-    drawBall();
-    drawPaddle();
-    
-    ball.x += ball.dx;
-    ball.y += ball.dy;
-    
-    // Wall collision (left/right)
-    if (ball.x + ball.radius > canvas.width || ball.x - ball.radius < 0) {
-        ball.dx = -ball.dx;
-    }
-    
-    // Wall collision (top)
-    if (ball.y - ball.radius < 0) {
-        ball.dy = -ball.dy;
-    }
-    
-    // Paddle collision
-    if (ball.y + ball.radius > canvas.height - paddle.height && 
-        ball.x > paddle.x && ball.x < paddle.x + paddle.width) {
-        ball.dy = -ball.dy;
-        // PROMPT: Increment the score when the ball hits the paddle
-        score++;
-        // PROMPT: Update the score display in the DOM each frame
-        scoreDisplay.textContent = `Score: ${score}`;
-    }
-    
-    // Bottom collision (miss)
-    if (ball.y + ball.radius > canvas.height) {
-        // PROMPT: Reset the ball to the center (with random x-direction) when it misses the paddle
-        ball.x = canvas.width / 2;
-        ball.y = canvas.height / 2;
-        ball.dx = 4 * (Math.random() > 0.5 ? 1 : -1);
-        ball.dy = 4;
-    }
-    
-    requestAnimationFrame(update);
-}
-
-canvas.addEventListener('mousemove', (e) => {
-    const relativeX = e.clientX - canvas.offsetLeft;
-    if (relativeX > 0 && relativeX < canvas.width) {
-        paddle.x = relativeX - paddle.width / 2;
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowUp' && paddleY > 0) {
+        paddleY -= 20;
+    } else if (e.key === 'ArrowDown' && paddleY < canvas.height - paddleHeight) {
+        paddleY += 20;
     }
 });
 
-update();
+gameLoop();

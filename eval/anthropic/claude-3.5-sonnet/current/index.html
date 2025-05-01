@@ -1,14 +1,22 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Pong Demo</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Pong Game</title>
+    <style>
+        /* PROMPT: Add score display styling */
+        canvas {
+            background: black;
+        }
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            background: #333;
+        }
+    </style>
 </head>
 <body>
-    <!-- PROMPT: Add a <div id="score">Score: 0</div> above the canvas to display the score -->
-    <div id="score">Score: 0</div>
-    <canvas id="pongCanvas" width="800" height="400"></canvas>
+    <canvas width="800" height="400" id="pongCanvas"></canvas>
     <script src="game.js"></script>
 </body>
 </html>

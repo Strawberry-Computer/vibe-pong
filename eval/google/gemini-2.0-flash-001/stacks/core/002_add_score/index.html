@@ -1,16 +1,21 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pong Demo</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Pong</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: black;
+        }
+        canvas {
+            display: block;
+            margin: 0 auto;
+        }
+    </style>
 </head>
 <body>
-    <!-- PROMPT: HTML: Add a `<div id="score">Score: 0</div>` above the canvas to display the score. -->
-    <div id="score">Score: 0</div>
-    <!-- PROMPT: HTML: Basic structure with a canvas element (id="pongCanvas", 800x400px) and a title "Pong Demo". -->
-    <canvas id="pongCanvas" width="800" height="400"></canvas>
+    <canvas id="pongCanvas" width="800" height="600"></canvas>
     <script src="game.js"></script>
 </body>
 </html>

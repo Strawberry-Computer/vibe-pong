@@ -1,95 +1,154 @@
-// PROMPT: JS: Add scoring to Pong with score variable, increment on paddle hit, update display, don't reset on miss.
+// PROMPT: Generate a simple Pong game using HTML, CSS, and JavaScript
 
+// PROMPT: Use <canvas width="800" height="400" id="pongCanvas">
 const canvas = document.getElementById('pongCanvas');
 const ctx = canvas.getContext('2d');
 
-// PROMPT: JS: Add a score variable starting at 0.
+// PROMPT: Enhance the Pong game by adding score display
+const scoreBoard = document.getElementById('scoreBoard');
 let score = 0;
-const scoreDiv = document.getElementById('score');
 
-const paddleWidth = 100;
-const paddleHeight = 10;
-let paddleX = (canvas.width - paddleWidth) / 2;
-const paddleY = canvas.height - paddleHeight - 10;
-const paddleSpeed = 7;
-let rightPressed = false;
-let leftPressed = false;
+// PROMPT: Draw a white paddle (10px wide, 100px high) at the left side of the canvas, movable up/down with arrow keys.
+const paddle = {
+    x: 0,
+    y: canvas.height / 2 - 50,
+    width: 10,
+    height: 100,
+    speed: 6,
+    moveUp: false,
+    moveDown: false
+};
 
-const ballRadius = 10;
-let ballX = canvas.width / 2;
-let ballY = canvas.height / 2;
-let ballSpeedX = 4;
-let ballSpeedY = -4;
+// PROMPT: Draw a white ball (10px radius) starting at canvas center, moving diagonally with constant speed.
+const ball = {
+    x: canvas.width / 2,
+    y: canvas.height / 2,
+    radius: 10,
+    speedX: 4,
+    speedY: -4
+};
 
+// PROMPT: Bounce the ball off the top and side walls; reset to center if it hits the bottom (misses paddle).
+function resetBall() {
+    ball.x = canvas.width / 2;
+    ball.y = canvas.height / 2;
+    ball.speedX = 4 * (Math.random() > 0.5 ? 1 : -1);
+    ball.speedY = -4;
+}
+
+// PROMPT: Draw paddle and ball
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    ctx.fillStyle = '#fff';
-    ctx.fillRect(paddleX, paddleY, paddleWidth, paddleHeight);
+    // Paddle
+    ctx.fillStyle = 'white';
+    ctx.fillRect(paddle.x, paddle.y, paddle.width, paddle.height);
 
+    // Ball
     ctx.beginPath();
-    ctx.arc(ballX, ballY, ballRadius, 0, Math.PI * 2);
-    ctx.fillStyle = '#fff';
+    ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI*2);
+    ctx.fillStyle = 'white';
     ctx.fill();
     ctx.closePath();
 
-    if (ballX + ballRadius > canvas.width || ballX - ballRadius < 0) {
-        ballSpeedX = -ballSpeedX;
-    }
-    if (ballY - ballRadius < 0) {
-        ballSpeedY = -ballSpeedY;
-    }
-
-    // PROMPT: Increment the score when the ball hits the paddle.
-    if (
-        ballY + ballRadius >= paddleY &&
-        ballY + ballRadius <= paddleY + paddleHeight &&
-        ballX >= paddleX &&
-        ballX <= paddleX + paddleWidth
-    ) {
-        ballSpeedY = -ballSpeedY;
-        ballY = paddleY - ballRadius;
-        score += 1;
-    }
-    // PROMPT: Reset the ball to the center (with random x-direction) when it misses the paddle (hits bottom), without resetting the score.
-    else if (ballY + ballRadius > canvas.height) {
-        ballX = canvas.width / 2;
-        ballY = canvas.height / 2;
-        ballSpeedX = 4 * (Math.random() < 0.5 ? 1 : -1);
-        ballSpeedY = -4;
-    }
-
-    ballX += ballSpeedX;
-    ballY += ballSpeedY;
-
-    if (rightPressed && paddleX + paddleWidth < canvas.width) {
-        paddleX += paddleSpeed;
-    } else if (leftPressed && paddleX > 0) {
-        paddleX -= paddleSpeed;
-    }
-
-    // PROMPT: Update the score display in the DOM each frame.
-    scoreDiv.textContent = "Score: " + score;
-
-    requestAnimationFrame(draw);
+    // PROMPT: Enhance the Pong game by adding score display
+    ctx.font = '32px monospace';
+    ctx.fillStyle = 'white';
+    ctx.textAlign = 'center';
+    ctx.fillText(`Score: ${score}`, canvas.width / 2, 40);
 }
 
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'ArrowRight') {
-        rightPressed = true;
+// PROMPT: Draw a white paddle ... movable up/down with arrow keys.
+function updatePaddle() {
+    if (paddle.moveUp) {
+        paddle.y -= paddle.speed;
+    } else if (paddle.moveDown) {
+        paddle.y += paddle.speed;
     }
-    if (e.key === 'ArrowLeft') {
-        leftPressed = true;
+    if (paddle.y < 0) paddle.y = 0;
+    if (paddle.y + paddle.height > canvas.height) paddle.y = canvas.height - paddle.height;
+}
+
+// PROMPT: Bounce the ball off the top and side walls; reset to center if it hits the bottom (misses paddle).
+// PROMPT: Detect paddle collision to bounce the ball back up.
+// PROMPT: Enhance the Pong game by adding score display
+function updateBall() {
+    ball.x += ball.speedX;
+    ball.y += ball.speedY;
+
+    // Top wall
+    if (ball.y - ball.radius < 0) {
+        ball.y = ball.radius;
+        ball.speedY *= -1;
+    }
+    // Left wall (bounce)
+    if (ball.x - ball.radius < 0) {
+        ball.x = ball.radius;
+        ball.speedX *= -1;
+    }
+    // Right wall (bounce)
+    if (ball.x + ball.radius > canvas.width) {
+        ball.x = canvas.width - ball.radius;
+        ball.speedX *= -1;
+    }
+    // Bottom wall: check for paddle/miss
+    if (ball.y + ball.radius > canvas.height) {
+        // Check paddle collision
+        if (
+            ball.x > paddle.x &&
+            ball.x < paddle.x + paddle.width &&
+            ball.y + ball.radius >= paddle.y &&
+            ball.y - ball.radius <= paddle.y + paddle.height
+        ) {
+            ball.y = canvas.height - ball.radius;
+            ball.speedY *= -1;
+            // PROMPT: Enhance the Pong game by adding score display
+            score++;
+            updateScoreDisplay();
+        } else {
+            // PROMPT: Enhance the Pong game by adding score display
+            score = 0;
+            updateScoreDisplay();
+            resetBall();
+        }
+    }
+}
+
+// PROMPT: Enhance the Pong game by adding score display
+function updateScoreDisplay() {
+    if (scoreBoard) {
+        scoreBoard.textContent = `Score: ${score}`;
+    }
+}
+
+// PROMPT: Use requestAnimationFrame for smooth animation.
+function gameLoop() {
+    updatePaddle();
+    updateBall();
+    draw();
+    requestAnimationFrame(gameLoop);
+}
+
+// PROMPT: Movable up/down with arrow keys.
+window.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowUp') {
+        paddle.moveUp = true;
+    }
+    if (e.key === 'ArrowDown') {
+        paddle.moveDown = true;
     }
 });
 
-document.addEventListener('keyup', function(e) {
-    if (e.key === 'ArrowRight') {
-        rightPressed = false;
+window.addEventListener('keyup', function(e) {
+    if (e.key === 'ArrowUp') {
+        paddle.moveUp = false;
     }
-    if (e.key === 'ArrowLeft') {
-        leftPressed = false;
+    if (e.key === 'ArrowDown') {
+        paddle.moveDown = false;
     }
 });
 
-draw();
+// PROMPT: Enhance the Pong game by adding score display
+updateScoreDisplay();
+
+gameLoop();

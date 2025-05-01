@@ -1,0 +1,16 @@
+body {
+    margin: 0;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #222; /* Dark background for contrast */
+}
+
+/* PROMPT: - Use <canvas width="800" height="400" id="pongCanvas"> */
+#pongCanvas {
+    background-color: #000; /* Ensure canvas has a background */
+    /* Optional: add a border for clarity */
+    border: 1px solid white;
+}
