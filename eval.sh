@@ -19,11 +19,12 @@ else
         "anthropic/claude-3.5-sonnet"
         "anthropic/claude-3.7-sonnet"
         "google/gemini-2.0-flash-001"
-        "google/gemini-2.5-pro-exp-03-25:free"
+        "google/gemini-2.5-flash-preview:thinking"
+        "google/gemini-2.5-pro-preview-03-25"
         "deepseek/deepseek-chat-v3-0324:free"
         "deepseek/deepseek-r1:free"
         "qwen/qwen3-30b-a3b:free"
-        "qwen/qwen3-235b-a22b:free"
+        "qwen/qwen3-235b-a22b"
         "x-ai/grok-3-beta"
     )
 fi
