@@ -9,14 +9,25 @@ vibe-pong/
 │   └── core/
 │       ├── 001_create_pong.md  # Initial game setup
 │       ├── 002_add_score.md    # Add scoring
-│       └── 003_ai_player.md    # Add AI opponent
+│       ├── 003_ai_player.md    # Add AI opponent
+│       └── plugins/
+│           └── coding-style.md # Coding style guidelines
 ├── output/
 │   ├── stacks/                 # Per-stage outputs
 │   └── current/                # Latest game files (index.html, styles.css, game.js)
 ├── eval/                       # Multi-model evaluation results
+│   ├── anthropic/              # Claude model evaluations
+│   ├── deepseek/               # DeepSeek model evaluations
+│   ├── google/                 # Gemini model evaluations
+│   ├── inception/              # Mercury model evaluations
+│   ├── openai/                 # GPT model evaluations
+│   ├── qwen/                   # Qwen model evaluations
+│   ├── x-ai/                   # Grok model evaluations
+│   └── results.log             # Evaluation summary
 ├── eval.sh                     # Script to run evaluation across multiple LLMs
 ├── vibec.json                  # Configuration
 ├── package.json                # Dependencies and scripts
+├── yarn.lock                   # Dependency lock file
 └── README.md                   # This file
 ```
 
@@ -104,7 +115,7 @@ The project includes an evaluation script (`eval.sh`) that tests how different L
 ```
 
 This script:
-- Tests multiple LLM models including GPT-4, Claude, Gemini, and DeepSeek variants
+- Tests multiple LLM models including GPT-4.1, GPT-4o-mini, Claude-3.5-sonnet, Claude-3.7-sonnet, Gemini-2.0-flash, Gemini-2.5-flash-preview, Gemini-2.5-pro-preview, DeepSeek-chat-v3, DeepSeek-r1, Qwen3-235b, Qwen3-30b, Mercury-coder-small-beta, and Grok-3-beta
 - Runs each model through the same prompt stacks
 - Outputs results to the `eval/` directory with model-specific folders
 - Generates a summary in `eval/results.log`
